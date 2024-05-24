@@ -1,4 +1,4 @@
-﻿/*
+/*
     Copyright 2017-2021 Katy Coe - http://www.djkaty.com - https://github.com/djkaty
 
     All rights reserved.
@@ -9,10 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Xml.Schema;
 using CommandLine;
 using CommandLine.Text;
 using Il2CppInspector.Cpp;
@@ -20,6 +17,7 @@ using Il2CppInspector.Cpp.UnityHeaders;
 using Il2CppInspector.Model;
 using Il2CppInspector.Outputs;
 using Il2CppInspector.Reflection;
+using Assembly = System.Reflection.Assembly;
 
 namespace Il2CppInspector.CLI
 {
@@ -176,7 +174,11 @@ namespace Il2CppInspector.CLI
         private static int Run(Options options) {
 
             // Banner
-            var asmInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetEntryAssembly().Location);
+            var location = Assembly.GetEntryAssembly().Location;
+            if (location == "") // Single file executables don't have an assembly location
+                location = Path.Join(AppContext.BaseDirectory, "Il2CppInspector.exe");
+
+            var asmInfo = FileVersionInfo.GetVersionInfo(location);
             Console.WriteLine(asmInfo.ProductName);
             Console.WriteLine("Version " + asmInfo.ProductVersion);
             Console.WriteLine(asmInfo.LegalCopyright);
