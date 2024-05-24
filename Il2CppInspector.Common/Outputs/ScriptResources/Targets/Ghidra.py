@@ -72,4 +72,4 @@ def add_xref(addr, to): pass
 def create_fake_segment(name, size): pass
 def write_string(addr, string): pass
 def write_address(addr, value): pass
-class StatusWrapper(BaseStatusHandler): pass
+class StatusHandler(BaseStatusHandler): pass
