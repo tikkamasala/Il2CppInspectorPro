@@ -88,7 +88,7 @@ namespace Il2CppInspector
             // Set object versioning for Bin2Object from metadata version
             Version = Header.version;
 
-            if (Version < 16 || Version > 29.1) {
+            if (Version < 16 || Version > 31) {
                 throw new InvalidOperationException($"The supplied metadata file is not of a supported version ({Header.version}).");
             }
 

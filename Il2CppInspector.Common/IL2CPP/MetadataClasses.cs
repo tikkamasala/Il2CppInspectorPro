@@ -314,6 +314,10 @@ namespace Il2CppInspector
         public int declaringType;
 
         public int returnType;
+
+        [Version(Min = 31)]
+        public int returnParameterToken;
+
         public int parameterStart;
 
         [Version(Max = 24.0)]
@@ -337,6 +341,9 @@ namespace Il2CppInspector
         public ushort iflags;
         public ushort slot;
         public ushort parameterCount;
+
+        [Version(Min = 29.2, Max = 31)]
+        public bool isUnmanagedCallersOnly;
     }
 
     public class Il2CppParameterDefinition

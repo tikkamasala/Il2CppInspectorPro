@@ -25,7 +25,9 @@ namespace Il2CppInspector.Reflection
         public ParameterAttributes Attributes { get; }
 
         // Custom attributes for this parameter
-        public IEnumerable<CustomAttributeData> CustomAttributes => CustomAttributeData.GetCustomAttributes(rootDefinition);
+        public IEnumerable<CustomAttributeData> CustomAttributes => Position == -1 /* Return type */
+            ? CustomAttributeData.GetCustomAttributes(DeclaringMethod.Assembly, MetadataToken, 0)
+            : CustomAttributeData.GetCustomAttributes(rootDefinition);
 
         // True if the parameter has a default value
         public bool HasDefaultValue => (Attributes & ParameterAttributes.HasDefault) != 0;
@@ -63,6 +65,7 @@ namespace Il2CppInspector.Reflection
             if (paramIndex == -1) {
                 Position = -1;
                 paramTypeReference = TypeRef.FromReferenceIndex(declaringMethod.Assembly.Model, declaringMethod.Definition.returnType);
+                MetadataToken = declaringMethod.Definition.returnParameterToken;
                 Attributes |= ParameterAttributes.Retval;
                 return;
             }

@@ -383,6 +383,15 @@ namespace Il2CppInspector.Outputs
                 mMethod.ParamDefs.Add(p);
             }
 
+            if (method is MethodInfo { ReturnParameter: not null } methodInfo && methodInfo.ReturnParameter.MetadataToken != 0)
+            {
+                mMethod.Parameters.ReturnParameter.CreateParamDef();
+                var returnParam = mMethod.Parameters.ReturnParameter.ParamDef;
+
+                foreach (var ca in methodInfo.ReturnParameter.CustomAttributes)
+                    AddCustomAttribute(module, returnParam, ca);
+            }
+
             // Everything that's not extern, abstract or a delegate type should have a method body
             if ((method.Attributes & System.Reflection.MethodAttributes.PinvokeImpl) == 0
                 && method.DeclaringType.BaseType?.FullName != "System.MulticastDelegate"
