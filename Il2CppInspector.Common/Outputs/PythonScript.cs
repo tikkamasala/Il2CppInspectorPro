@@ -72,9 +72,11 @@ namespace Il2CppInspector.Outputs
         private void writeJsonMetadata(string jsonMetadataFile) => new JSONMetadata(model).Write(jsonMetadataFile);
 
         private string getRelativePath(string from, string to) =>
-            Path.GetRelativePath(Path.GetDirectoryName(Path.GetFullPath(from)),
-                                           Path.GetDirectoryName(Path.GetFullPath(to)))
-                                         + Path.DirectorySeparatorChar
+            Path.GetRelativePath(Path.GetDirectoryName(Path.GetFullPath(from))!,
+                                           Path.GetDirectoryName(Path.GetFullPath(to))!)
+                                         + '/' 
+                                        // We do not use Path.DirectorySeparatorChar here as scripts might be generated on windows then ran on linux,
+                                        // and / is cross-compatible
                                          + Path.GetFileName(to);
     }
 }
