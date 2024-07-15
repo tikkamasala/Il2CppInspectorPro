@@ -172,17 +172,18 @@ namespace Il2CppInspector.CLI
         }
 
         private static int Run(Options options) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                // Banner
+                var location = Assembly.GetEntryAssembly().Location;
+                if (location == "") // Single file executables don't have an assembly location
+                    location = Path.Join(AppContext.BaseDirectory, "Il2CppInspector.exe");
 
-            // Banner
-            var location = Assembly.GetEntryAssembly().Location;
-            if (location == "") // Single file executables don't have an assembly location
-                location = Path.Join(AppContext.BaseDirectory, "Il2CppInspector.exe");
-
-            var asmInfo = FileVersionInfo.GetVersionInfo(location);
-            Console.WriteLine(asmInfo.ProductName);
-            Console.WriteLine("Version " + asmInfo.ProductVersion);
-            Console.WriteLine(asmInfo.LegalCopyright);
-            Console.WriteLine("");
+                var asmInfo = FileVersionInfo.GetVersionInfo(location);
+                Console.WriteLine(asmInfo.ProductName);
+                Console.WriteLine("Version " + asmInfo.ProductVersion);
+                Console.WriteLine(asmInfo.LegalCopyright);
+                Console.WriteLine("");
+            }
 
             // Safe plugin manager load
             try {
