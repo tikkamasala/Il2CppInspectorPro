@@ -131,7 +131,7 @@ Class library targets .NET 8. Built with Visual Studio 2019.
 ### Build instructions
 
 ```
-git clone --recursive https://github.com/djkaty/Il2CppInspector
+git clone --recursive https://github.com/LukeFZ/Il2CppInspectorRedux
 cd Il2CppInspector
 ```
 
@@ -181,9 +181,9 @@ Get all current plugins (optional):
 
 For other operating systems supporting .NET Core, add  `-r xxx` to the final command where `xxx` is a RID from https://docs.microsoft.com/en-us/dotnet/articles/core/rid-catalog
 
-The output binary for command-line usage is placed in `Il2CppInspector/Il2CppInspector.CLI/bin/Release/netcoreapp3.0/[win|osx|linux]-x64/publish/Il2CppInspector.exe`.
+The output binary for command-line usage is placed in `Il2CppInspector/Il2CppInspector.CLI/bin/Release/net8.0/[win|osx|linux]-x64/publish/Il2CppInspector.exe`.
 
-The output binary for Windows GUI is placed in `Il2CppInspector/Il2CppInspector.GUI/bin/Release/netcoreapp3.1/[win|osx|linux]-x64/publish/Il2CppInspector.exe`.
+The output binary for Windows GUI is placed in `Il2CppInspector/Il2CppInspector.GUI/bin/Release/net8.0-windows/win-x64/publish/Il2CppInspector.exe`.
 
 The `plugins` folder should be placed in the same folder as `Il2CppInspector.exe`.
 
@@ -749,6 +749,8 @@ Unity version | IL2CPP version | Support
 2021.1.0-2021.1.x | 27.2 | Working
 2021.2.0-2021.2.x | 29 | Working
 2021.3.0+ | 29.1 | Working
+2023.2.0a22 | 29.2 | Working
+2022.3.33+ | 31(.1) | Working
 
 Please refer to the companion repository https://github.com/nneonneo/Il2CppVersions if you would like to track the changes between each IL2CPP release version.
 
