@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using Il2CppInspector.Next;
 using Il2CppInspector.Reflection;
 
 namespace Il2CppInspector.Outputs
@@ -186,7 +187,7 @@ namespace Il2CppInspector.Outputs
             };
             
             if (mType.IsExplicitLayout || mType.IsSequentialLayout)
-                mType.ClassLayout = new ClassLayoutUser(1, (uint)type.Sizes.nativeSize);
+                mType.ClassLayout = new ClassLayoutUser(1, (uint)type.Sizes.NativeSize);
 
             // Add nested types
             foreach (var nestedType in type.DeclaredNestedTypes)
@@ -241,7 +242,7 @@ namespace Il2CppInspector.Outputs
                 AddMethod(module, mType, method);
 
             // Add token attribute
-            if (type.Definition != null)
+            if (type.Definition.IsValid)
                 mType.AddAttribute(module, tokenAttribute, ("Token", $"0x{type.MetadataToken:X8}"));
 
             // Add custom attribute attributes
@@ -269,7 +270,7 @@ namespace Il2CppInspector.Outputs
             if (field.HasFieldRVA) {
                 // Attempt to get field size
 
-                var fieldSize = field.FieldType.Sizes.nativeSize;
+                var fieldSize = field.FieldType.Sizes.NativeSize;
                 var preview = model.Package.Metadata.ReadBytes((long) field.DefaultValueMetadataAddress, fieldSize);
 
                 mField.InitialValue = preview;
@@ -310,7 +311,7 @@ namespace Il2CppInspector.Outputs
 
             // Add token attribute
             // Generic properties and constructed properties (from disperate get/set methods) have no definition
-            if (prop.Definition != null)
+            if (prop.Definition.IsValid)
                 mProp.AddAttribute(module, tokenAttribute, ("Token", $"0x{prop.MetadataToken:X8}"));
 
             // Add custom attribute attributes
@@ -432,8 +433,8 @@ namespace Il2CppInspector.Outputs
                         ("Offset", string.Format("0x{0:X}", model.Package.BinaryImage.MapVATR(method.VirtualAddress.Value.Start))),
                         ("VA", method.VirtualAddress.Value.Start.ToAddressString())
                     };
-                if (method.Definition.slot != ushort.MaxValue)
-                    args.Add(("Slot", method.Definition.slot.ToString()));
+                if (method.Definition.Slot != ushort.MaxValue)
+                    args.Add(("Slot", method.Definition.Slot.ToString()));
 
                 mMethod.AddAttribute(module, addressAttribute, args.ToArray());
             }
@@ -591,7 +592,7 @@ namespace Il2CppInspector.Outputs
             // Create folder for DLLs
             Directory.CreateDirectory(outputPath);
 
-            if (model.Package.Version >= 29)
+            if (model.Package.Version >= MetadataVersions.V290)
             {
                 // We can now apply all attributes directly.
                 directApplyAttributes = model.TypesByDefinitionIndex
@@ -648,7 +649,7 @@ namespace Il2CppInspector.Outputs
                     AddCustomAttribute(module, module.Assembly, ca);
 
                 // Add token attributes
-                module.AddAttribute(module, tokenAttribute, ("Token", $"0x{asm.ImageDefinition.token:X8}"));
+                module.AddAttribute(module, tokenAttribute, ("Token", $"0x{asm.ImageDefinition.Token:X8}"));
                 module.Assembly.AddAttribute(module, tokenAttribute, ("Token", $"0x{asm.MetadataToken:X8}"));
 
                 if (types.TryGetValue(module, out var shallowTypes))

@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using dnlib.DotNet;
+using Il2CppInspector.Next;
+using Il2CppInspector.Next.BinaryMetadata;
+using Il2CppInspector.Next.Metadata;
 using Il2CppInspector.Reflection;
 using Il2CppInspector.Utils;
-using NoisyCowStudios.Bin2Object;
 
 namespace Il2CppInspector
 {
@@ -14,7 +16,7 @@ namespace Il2CppInspector
     {
         private readonly Il2CppInspector _inspector;
         private readonly Assembly _assembly;
-        private readonly BinaryObjectStream _data;
+        private readonly BinaryObjectStreamReader _data;
 
         private readonly uint _start;
         private readonly uint _end;
@@ -24,7 +26,7 @@ namespace Il2CppInspector
 
         public uint Count { get; }
 
-        public CustomAttributeDataReader(Il2CppInspector inspector, Assembly assembly, BinaryObjectStream data, uint startOffset, uint endOffset)
+        public CustomAttributeDataReader(Il2CppInspector inspector, Assembly assembly, BinaryObjectStreamReader data, uint startOffset, uint endOffset)
         {
             _inspector = inspector;
             _assembly = assembly;
@@ -143,9 +145,9 @@ namespace Il2CppInspector
         }
 
         private TypeInfo ConvertTypeDef(Il2CppTypeDefinition typeDef, Il2CppTypeEnum type)
-            => typeDef == null
-                ? _assembly.Model.GetTypeDefinitionFromTypeEnum(type)
-                : _assembly.Model.TypesByDefinitionIndex[Array.IndexOf(_inspector.TypeDefinitions, typeDef)];
+            => typeDef.IsValid
+                ? _assembly.Model.TypesByDefinitionIndex[_inspector.TypeDefinitions.IndexOf(typeDef)]
+                : _assembly.Model.GetTypeDefinitionFromTypeEnum(type);
 
         private (TypeInfo, int) ReadCustomAttributeNamedArgumentClassAndIndex(TypeInfo attrInfo)
         {

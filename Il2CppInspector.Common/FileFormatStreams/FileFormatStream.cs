@@ -6,17 +6,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Il2CppInspector.Next;
 using NoisyCowStudios.Bin2Object;
+using VersionedSerialization;
 
 namespace Il2CppInspector
 {
     public interface IFileFormatStream
     {
-        double Version { get; set; }
+        StructVersion Version { get; set; }
         long Length { get; }
         uint NumImages { get; }
         string DefaultFilename { get; }
@@ -91,6 +94,9 @@ namespace Il2CppInspector
         long[] ReadMappedWordArray(ulong uiAddr, int count);
         List<U> ReadMappedObjectPointerArray<U>(ulong uiAddr, int count) where U : new();
 
+        ulong ReadMappedUWord(ulong uiAddr);
+        ulong[] ReadMappedUWordArray(ulong uiAddr, int count);
+
         void WriteEndianBytes(byte[] bytes);
         void Write(long int64);
         void Write(ulong uint64);
@@ -120,6 +126,30 @@ namespace Il2CppInspector
 
         public void AddPrimitiveMapping(Type objType, Type streamType);
         public void CopyTo(Stream stream);
+
+        public TType ReadMappedPrimitive<TType>(ulong addr) where TType : unmanaged;
+        public TType ReadPrimitive<TType>(long addr) where TType : unmanaged;
+        public TType ReadPrimitive<TType>() where TType : unmanaged;
+
+        public ImmutableArray<TType> ReadMappedPrimitiveArray<TType>(ulong addr, long count) where TType : unmanaged;
+        public ImmutableArray<TType> ReadPrimitiveArray<TType>(long addr, long count) where TType : unmanaged;
+        public ImmutableArray<TType> ReadPrimitiveArray<TType>(long count) where TType : unmanaged;
+
+        public TType ReadMappedVersionedObject<TType>(ulong addr) where TType : IReadable, new();
+        public TType ReadVersionedObject<TType>(long addr) where TType : IReadable, new();
+        public TType ReadVersionedObject<TType>() where TType : IReadable, new();
+
+        public ImmutableArray<TType> ReadMappedVersionedObjectArray<TType>(ulong addr, long count)
+            where TType : IReadable, new();
+
+        public ImmutableArray<TType> ReadVersionedObjectArray<TType>(long addr, long count)
+            where TType : IReadable, new();
+
+        public ImmutableArray<TType> ReadVersionedObjectArray<TType>(long count)
+            where TType : IReadable, new();
+
+        public ImmutableArray<TType> ReadMappedVersionedObjectPointerArray<TType>(ulong addr, int count)
+            where TType : IReadable, new();
     }
 
     public class FileFormatStream
@@ -160,7 +190,7 @@ namespace Il2CppInspector
         }
     }
 
-    public abstract class FileFormatStream<T> : BinaryObjectStream, IFileFormatStream where T : FileFormatStream<T>
+    public abstract class FileFormatStream<T> : BinaryObjectStreamReader, IFileFormatStream where T : FileFormatStream<T>
     {
         public abstract string DefaultFilename { get; }
 
@@ -254,7 +284,7 @@ namespace Il2CppInspector
         public virtual uint MapVATR(ulong uiAddr) => (uint) uiAddr;
 
         // Try to map an RVA to an offset in the file image
-        public bool TryMapVATR(ulong uiAddr, out uint fileOffset) {
+        public virtual bool TryMapVATR(ulong uiAddr, out uint fileOffset) {
             try {
                 fileOffset = MapVATR(uiAddr);
                 return true;
@@ -321,6 +351,43 @@ namespace Il2CppInspector
             for (int i = 0; i < count; i++)
                 array.Add(ReadMappedObject<U>(pointers[i]));
             return array;
+        }
+
+        public TType ReadMappedPrimitive<TType>(ulong addr) where TType : unmanaged => ReadPrimitive<TType>(MapVATR(addr));
+
+        public ImmutableArray<TType> ReadMappedPrimitiveArray<TType>(ulong addr, long count) where TType : unmanaged 
+            => ReadPrimitiveArray<TType>(MapVATR(addr), count);
+
+        public TType ReadMappedVersionedObject<TType>(ulong addr) where TType : IReadable, new() => ReadVersionedObject<TType>(MapVATR(addr));
+
+        public ImmutableArray<TType> ReadMappedVersionedObjectArray<TType>(ulong addr, long count) where TType : IReadable, new()
+            => ReadVersionedObjectArray<TType>(MapVATR(addr), count);
+
+        public ImmutableArray<TType> ReadMappedVersionedObjectPointerArray<TType>(ulong addr, int count)
+            where TType : IReadable, new()
+        {
+            var pointers = ReadMappedUWordArray(addr, count);
+            var builder = ImmutableArray.CreateBuilder<TType>((int)count);
+            for (long i = 0; i < count; i++)
+                builder.Add(ReadMappedVersionedObject<TType>(pointers[i]));
+
+            return builder.MoveToImmutable();
+        }
+
+        public ulong ReadMappedUWord(ulong uiAddr)
+        {
+            Position = MapVATR(uiAddr);
+            return ReadNUInt();
+        }
+
+        public ulong[] ReadMappedUWordArray(ulong uiAddr, int count)
+        {
+            Position = MapVATR(uiAddr);
+            var arr = new ulong[count];
+            for (int i = 0; i < count; i++)
+                arr[i] = ReadNUInt();
+
+            return arr;
         }
     }
 }

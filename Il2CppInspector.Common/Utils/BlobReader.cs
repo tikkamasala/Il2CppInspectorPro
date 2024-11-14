@@ -1,14 +1,15 @@
 ﻿using NoisyCowStudios.Bin2Object;
 using System.Text;
-using System;
 using System.Diagnostics;
-using System.IO;
+using Il2CppInspector.Next;
+using Il2CppInspector.Next.BinaryMetadata;
+using Il2CppInspector.Next.Metadata;
 
 namespace Il2CppInspector.Utils;
 
 public static class BlobReader
 {
-    public static object GetConstantValueFromBlob(Il2CppInspector inspector, Il2CppTypeEnum type, BinaryObjectStream blob)
+    public static object GetConstantValueFromBlob(Il2CppInspector inspector, Il2CppTypeEnum type, BinaryObjectStreamReader blob)
     {
         const byte kArrayTypeWithDifferentElements = 1;
 
@@ -25,7 +26,7 @@ public static class BlobReader
                 break;
             case Il2CppTypeEnum.IL2CPP_TYPE_CHAR:
                 // UTF-8 character assumed
-                value = BitConverter.ToChar(blob.ReadBytes(2), 0);
+                value = (char)blob.ReadPrimitive<short>();
                 break;
             case Il2CppTypeEnum.IL2CPP_TYPE_U2:
                 value = blob.ReadUInt16();
@@ -111,7 +112,7 @@ public static class BlobReader
 
         int ReadInt32()
         {
-            if (blob.Version >= 29)
+            if (blob.Version >= MetadataVersions.V290)
             {
                 var address = blob.Position;
 
@@ -131,7 +132,7 @@ public static class BlobReader
 
         uint ReadUInt32()
         {
-            if (blob.Version >= 29)
+            if (blob.Version >= MetadataVersions.V290)
             {
                 var address = blob.Position;
 
@@ -153,18 +154,18 @@ public static class BlobReader
     public static Il2CppTypeEnum ReadEncodedTypeEnum(Il2CppInspector inspector, BinaryObjectStream blob,
         out Il2CppTypeDefinition enumType)
     {
-        enumType = null;
+        enumType = default;
 
         var typeEnum = (Il2CppTypeEnum)blob.ReadByte();
         if (typeEnum == Il2CppTypeEnum.IL2CPP_TYPE_ENUM)
         {
             var typeIndex = blob.ReadCompressedInt32();
-            var typeHandle = (uint)inspector.TypeReferences[typeIndex].datapoint;
+            var typeHandle = inspector.TypeReferences[typeIndex].Data.KlassIndex;
             enumType = inspector.TypeDefinitions[typeHandle];
 
-            var elementTypeHandle = inspector.TypeReferences[enumType.elementTypeIndex].datapoint;
+            var elementTypeHandle = inspector.TypeReferences[enumType.ElementTypeIndex].Data.KlassIndex;
             var elementType = inspector.TypeDefinitions[elementTypeHandle];
-            typeEnum = inspector.TypeReferences[elementType.byvalTypeIndex].type;
+            typeEnum = inspector.TypeReferences[elementType.ByValTypeIndex].Type;
         }
         // This technically also handles SZARRAY (System.Array) and all others by just returning their system type
 

@@ -5,13 +5,14 @@
     All rights reserved.
 */
 
-using System;
-using System.Collections.Generic;
+using Il2CppInspector.Next;
+using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Il2CppInspector.Next.BinaryMetadata;
+using Il2CppInspector.Next.Metadata;
+using VersionedSerialization;
 
 namespace Il2CppInspector
 {
@@ -34,16 +35,16 @@ namespace Il2CppInspector
         public ulong CodeRegistrationPointer { get; private set; }
         public ulong MetadataRegistrationPointer { get; private set; }
         public ulong RegistrationFunctionPointer { get; private set; }
-        public Dictionary<string, ulong> CodeGenModulePointers { get; } = new Dictionary<string, ulong>();
+        public Dictionary<string, ulong> CodeGenModulePointers { get; } = new();
 
         // Only for <=v24.1
         public ulong[] GlobalMethodPointers { get; set; }
 
         // Only for >=v24.2
-        public Dictionary<Il2CppCodeGenModule, ulong[]> ModuleMethodPointers { get; set; } = new Dictionary<Il2CppCodeGenModule, ulong[]>();
+        public Dictionary<Il2CppCodeGenModule, ulong[]> ModuleMethodPointers { get; set; } = new();
 
         // Only for >=v24.2. In earlier versions, invoker indices are stored in Il2CppMethodDefinition in the metadata file
-        public Dictionary<Il2CppCodeGenModule, int[]> MethodInvokerIndices { get; set; } = new Dictionary<Il2CppCodeGenModule, int[]>();
+        public Dictionary<Il2CppCodeGenModule, ImmutableArray<int>> MethodInvokerIndices { get; set; } = new();
 
         // NOTE: In versions <21 and earlier releases of v21, use FieldOffsets:
         // global field index => field offset
@@ -51,7 +52,7 @@ namespace Il2CppInspector
         // type index => RVA in image where the list of field offsets for the type start (4 bytes per field)
         
         // Negative field offsets from start of each function
-        public uint[] FieldOffsets { get; private set; }
+        public ImmutableArray<uint> FieldOffsets { get; private set; }
 
         // Pointers to field offsets
         public long[] FieldOffsetPointers { get; private set; }
@@ -65,13 +66,13 @@ namespace Il2CppInspector
         public ulong[] MethodInvokePointers { get; private set; }
 
         // Version 16 and below: method references for vtable
-        public uint[] VTableMethodReferences { get; private set; }
+        public ImmutableArray<uint> VTableMethodReferences { get; private set; }
 
         // Generic method specs for vtables
-        public Il2CppMethodSpec[] MethodSpecs { get; private set; }
+        public ImmutableArray<Il2CppMethodSpec> MethodSpecs { get; private set; }
 
         // List of run-time concrete generic class and method signatures
-        public List<Il2CppGenericInst> GenericInstances { get; private set; }
+        public ImmutableArray<Il2CppGenericInst> GenericInstances { get; private set; }
 
         // List of constructed generic method function pointers corresponding to each possible method instantiation
         public Dictionary<Il2CppMethodSpec, ulong> GenericMethodPointers { get; } = new Dictionary<Il2CppMethodSpec, ulong>();
@@ -80,7 +81,7 @@ namespace Il2CppInspector
         public Dictionary<Il2CppMethodSpec, int> GenericMethodInvokerIndices { get; } = new Dictionary<Il2CppMethodSpec, int>();
 
         // Every type reference (TypeRef) sorted by index
-        public List<Il2CppType> TypeReferences { get; private set; }
+        public ImmutableArray<Il2CppType> TypeReferences { get; private set; }
 
         // Every type reference index sorted by virtual address
         public Dictionary<ulong, int> TypeReferenceIndicesByAddress { get; private set; }
@@ -89,7 +90,7 @@ namespace Il2CppInspector
         // One assembly may contain multiple modules
         public Dictionary<string, Il2CppCodeGenModule> Modules { get; private set; }
 
-        public List<Il2CppTypeDefinitionSizes> TypeDefinitionSizes { get; private set; }
+        public ImmutableArray<Il2CppTypeDefinitionSizes> TypeDefinitionSizes { get; private set; }
 
         // Status update callback
         private EventHandler<string> OnStatusUpdate { get; set; }
@@ -135,7 +136,7 @@ namespace Il2CppInspector
         }
 
         // Load binary without a global-metadata.dat available
-        public static Il2CppBinary Load(IFileFormatStream stream, double metadataVersion, EventHandler<string> statusCallback = null) {
+        public static Il2CppBinary Load(IFileFormatStream stream, StructVersion metadataVersion, EventHandler<string> statusCallback = null) {
             foreach (var loadedImage in stream.TryNextLoadStrategy()) {
                 var inst = LoadImpl(stream, statusCallback);
                 if (inst.FindRegistrationStructs(metadataVersion))
@@ -167,7 +168,7 @@ namespace Il2CppInspector
         }
 
         // Initialize binary without a global-metadata.dat available
-        public bool FindRegistrationStructs(double metadataVersion) {
+        public bool FindRegistrationStructs(StructVersion metadataVersion) {
             Image.Version = metadataVersion;
 
             StatusUpdate("Searching for binary metadata");
@@ -277,29 +278,8 @@ namespace Il2CppInspector
             Console.WriteLine("MetadataRegistration struct found at 0x{0:X16} (file offset 0x{1:X8})", Image.Bits == 32 ? metadataRegistration & 0xffff_ffff : metadataRegistration, Image.MapVATR(metadataRegistration));
 
             // Root structures from which we find everything else
-            CodeRegistration = Image.ReadMappedObject<Il2CppCodeRegistration>(codeRegistration);
-            MetadataRegistration = Image.ReadMappedObject<Il2CppMetadataRegistration>(metadataRegistration);
-
-            // genericAdjustorThunks was inserted before invokerPointersCount in 24.5 and 27.1
-            // pointer expected if we need to bump version
-            if (Image.Version == 24.4 && CodeRegistration.invokerPointersCount > 0x50000)
-            {
-                Image.Version = 24.5;
-                CodeRegistration = Image.ReadMappedObject<Il2CppCodeRegistration>(codeRegistration);
-            }
-
-            if (Image.Version == 24.4 && CodeRegistration.reversePInvokeWrapperCount > 0x50000) {
-                Image.Version = 24.5;
-                codeRegistration -= 1 * pointerSize;
-                CodeRegistration = Image.ReadMappedObject<Il2CppCodeRegistration>(codeRegistration);
-            }
-
-            if (Image.Version is 29 or 31 && (long)CodeRegistration.genericMethodPointersCount - MetadataRegistration.genericMethodTableCount > 0x10000)
-            {
-                Image.Version += 0.1;
-                codeRegistration -= 2 * pointerSize;
-                CodeRegistration = Image.ReadMappedObject<Il2CppCodeRegistration>(codeRegistration);
-            }
+            CodeRegistration = Image.ReadMappedVersionedObject<Il2CppCodeRegistration>(codeRegistration);
+            MetadataRegistration = Image.ReadMappedVersionedObject<Il2CppMetadataRegistration>(metadataRegistration);
 
             // Plugin hook to pre-process binary
             isModified |= PluginHooks.PreProcessBinary(this).IsStreamModified;
@@ -313,36 +293,36 @@ namespace Il2CppInspector
              * typeRefPointers must be a series of pointers in __const
              * MethodInvokePointers must be a series of pointers in __text or .text, and in sequential order
              */
-            if ((Metadata != null && Metadata.Types.Length != MetadataRegistration.typeDefinitionsSizesCount)
-                || CodeRegistration.reversePInvokeWrapperCount > 0x10000
-                || CodeRegistration.unresolvedVirtualCallCount > 0x4000 // >= 22
-                || CodeRegistration.interopDataCount > 0x1000           // >= 23
-                || (Image.Version <= 24.1 && CodeRegistration.invokerPointersCount > CodeRegistration.methodPointersCount))
+            if ((Metadata != null && Metadata.Types.Length != MetadataRegistration.TypeDefinitionsSizesCount)
+                || CodeRegistration.ReversePInvokeWrapperCount > 0x10000
+                || CodeRegistration.UnresolvedVirtualCallCount > 0x4000 // >= 22
+                || CodeRegistration.InteropDataCount > 0x1000           // >= 23
+                || (Image.Version <= MetadataVersions.V241 && CodeRegistration.InvokerPointersCount > CodeRegistration.MethodPointersCount))
                 throw new NotSupportedException("The detected Il2CppCodeRegistration / Il2CppMetadataRegistration structs do not pass validation. This may mean that their fields have been re-ordered as a form of obfuscation and Il2CppInspector has not been able to restore the original order automatically. Consider re-ordering the fields in Il2CppBinaryClasses.cs and try again.");
             
             // The global method pointer list was deprecated in v24.2 in favour of Il2CppCodeGenModule
-            if (Image.Version <= 24.1)
-                GlobalMethodPointers = Image.ReadMappedArray<ulong>(CodeRegistration.pmethodPointers, (int) CodeRegistration.methodPointersCount);
+            if (Image.Version <= MetadataVersions.V241)
+                GlobalMethodPointers = Image.ReadMappedUWordArray(CodeRegistration.MethodPointers, (int) CodeRegistration.MethodPointersCount);
 
             // After v24 method pointers and RGCTX data were stored in Il2CppCodeGenModules
-            if (Image.Version >= 24.2) {
+            if (Image.Version >= MetadataVersions.V242) {
                 Modules = new Dictionary<string, Il2CppCodeGenModule>();
 
                 // In v24.3, windowsRuntimeFactoryTable collides with codeGenModules. So far no samples have had windowsRuntimeFactoryCount > 0;
                 // if this changes we'll have to get smarter about disambiguating these two.
-                if (CodeRegistration.codeGenModulesCount == 0) {
-                    Image.Version = 24.3;
-                    CodeRegistration = Image.ReadMappedObject<Il2CppCodeRegistration>(codeRegistration);
+                if (CodeRegistration.CodeGenModulesCount == 0) {
+                    Image.Version = MetadataVersions.V243;
+                    CodeRegistration = Image.ReadMappedVersionedObject<Il2CppCodeRegistration>(codeRegistration);
                 }
 
                 // Array of pointers to Il2CppCodeGenModule
-                var codeGenModulePointers = Image.ReadMappedArray<ulong>(CodeRegistration.pcodeGenModules, (int) CodeRegistration.codeGenModulesCount);
-                var modules = Image.ReadMappedObjectPointerArray<Il2CppCodeGenModule>(CodeRegistration.pcodeGenModules, (int) CodeRegistration.codeGenModulesCount);
+                var codeGenModulePointers = Image.ReadMappedUWordArray(CodeRegistration.CodeGenModules, (int) CodeRegistration.CodeGenModulesCount);
+                var modules = Image.ReadMappedVersionedObjectPointerArray<Il2CppCodeGenModule>(CodeRegistration.CodeGenModules, (int) CodeRegistration.CodeGenModulesCount);
 
                 foreach (var mp in modules.Zip(codeGenModulePointers, (m, p) => new { Module = m, Pointer = p })) {
                     var module = mp.Module;
 
-                    var name = Image.ReadMappedNullTerminatedString(module.moduleName);
+                    var name = Image.ReadMappedNullTerminatedString(module.ModuleName);
                     Modules.Add(name, module);
                     CodeGenModulePointers.Add(name, mp.Pointer);
 
@@ -351,24 +331,24 @@ namespace Il2CppInspector
                     // the entire method pointer array will be NULL values, causing the methodPointer to be mapped to .bss
                     // and therefore out of scope of the binary image
                     try {
-                        ModuleMethodPointers.Add(module, Image.ReadMappedArray<ulong>(module.methodPointers, (int) module.methodPointerCount));
+                        ModuleMethodPointers.Add(module, Image.ReadMappedUWordArray(module.MethodPointers, (int) module.MethodPointerCount));
                     } catch (InvalidOperationException) {
-                        ModuleMethodPointers.Add(module, new ulong[module.methodPointerCount]);
+                        ModuleMethodPointers.Add(module, new ulong[module.MethodPointerCount]);
                     }
 
                     // Read method invoker pointer indices - one per method
-                    MethodInvokerIndices.Add(module, Image.ReadMappedArray<int>(module.invokerIndices, (int) module.methodPointerCount));
+                    MethodInvokerIndices.Add(module, Image.ReadMappedPrimitiveArray<int>(module.InvokerIndices, (int) module.MethodPointerCount));
                 }
             }
 
             // Field offset data. Metadata <=21.x uses a value-type array; >=21.x uses a pointer array
 
             // Versions from 22 onwards use an array of pointers in Binary.FieldOffsetData
-            bool fieldOffsetsArePointers = (Image.Version >= 22);
+            bool fieldOffsetsArePointers = (Image.Version >= MetadataVersions.V220);
 
             // Some variants of 21 also use an array of pointers
-            if (Image.Version == 21) {
-                var fieldTest = Image.ReadMappedWordArray(MetadataRegistration.pfieldOffsets, 6);
+            if (Image.Version == MetadataVersions.V210) {
+                var fieldTest = Image.ReadMappedWordArray(MetadataRegistration.FieldOffsets, 6);
 
                 // We detect this by relying on the fact Module, Object, ValueType, Attribute, _Attribute and Int32
                 // are always the first six defined types, and that all but Int32 have no fields
@@ -377,29 +357,66 @@ namespace Il2CppInspector
 
             // All older versions use values directly in the array
             if (!fieldOffsetsArePointers)
-                FieldOffsets = Image.ReadMappedArray<uint>(MetadataRegistration.pfieldOffsets, (int)MetadataRegistration.fieldOffsetsCount);
+                FieldOffsets = Image.ReadMappedPrimitiveArray<uint>(MetadataRegistration.FieldOffsets, (int)MetadataRegistration.FieldOffsetsCount);
             else
-                FieldOffsetPointers = Image.ReadMappedWordArray(MetadataRegistration.pfieldOffsets, (int)MetadataRegistration.fieldOffsetsCount);
+                FieldOffsetPointers = Image.ReadMappedWordArray(MetadataRegistration.FieldOffsets, (int)MetadataRegistration.FieldOffsetsCount);
 
             // Type references (pointer array)
-            var typeRefPointers = Image.ReadMappedArray<ulong>(MetadataRegistration.ptypes, (int) MetadataRegistration.typesCount);
+            var typeRefPointers = Image.ReadMappedUWordArray(MetadataRegistration.Types, (int) MetadataRegistration.TypesCount);
             TypeReferenceIndicesByAddress = typeRefPointers.Zip(Enumerable.Range(0, typeRefPointers.Length), (a, i) => new { a, i }).ToDictionary(x => x.a, x => x.i);
             
-            TypeReferences = 
-                Image.Version >= 27.2 
-                    ? Image.ReadMappedObjectPointerArray<Il2CppTypeV272>(MetadataRegistration.ptypes, (int) MetadataRegistration.typesCount)
-                        .Cast<Il2CppType>()
-                        .ToList() 
-                    : Image.ReadMappedObjectPointerArray<Il2CppType>(MetadataRegistration.ptypes, (int)MetadataRegistration.typesCount);
+            TypeReferences = Image.ReadMappedVersionedObjectPointerArray<Il2CppType>(MetadataRegistration.Types, (int)MetadataRegistration.TypesCount);
+
+            if (TypeReferences.Any(x => 
+                    x.Type.IsTypeDefinitionEnum() 
+                    && (uint)x.Data.KlassIndex >= (uint)Metadata.Types.Length))
+            {
+                // This is a memory-dumped binary.
+                // We need to fix the remapped type indices from their pointer form back to the indices.
+                var baseDefinitionPtr = ulong.MaxValue;
+                var baseGenericPtr = ulong.MaxValue;
+
+                foreach (var entry in TypeReferences)
+                {
+                    if (entry.Type.IsTypeDefinitionEnum())
+                    {
+                        baseDefinitionPtr = Math.Min(baseDefinitionPtr, entry.Data.Type.PointerValue);
+                    }
+                    else if (entry.Type.IsGenericParameterEnum())
+                    {
+                        baseGenericPtr = Math.Min(baseGenericPtr, entry.Data.GenericParameterHandle.PointerValue);
+                    }
+
+                }
+
+                var definitionSize = (ulong)Il2CppTypeDefinition.Size(Image.Version);
+                var genericParameterSize = (ulong)Il2CppGenericParameter.Size(Image.Version);
+
+                var builder = ImmutableArray.CreateBuilder<Il2CppType>(TypeReferences.Length);
+                for (var i = 0; i < TypeReferences.Length; i++)
+                {
+                    var type = TypeReferences[i];
+                    if (type.Type.IsTypeDefinitionEnum())
+                    {
+                        type.Data.Value = (type.Data.Type.PointerValue - baseDefinitionPtr) / definitionSize;
+                    }
+                    else if (type.Type.IsGenericParameterEnum())
+                    {
+                        type.Data.Value = (type.Data.Type.PointerValue - baseGenericPtr) / genericParameterSize;
+                    }
+                    builder.Add(type);
+                }
+                TypeReferences = builder.MoveToImmutable();
+            }
 
             // Custom attribute constructors (function pointers)
             // This is managed in Il2CppInspector for metadata >= 27
-            if (Image.Version < 27) {
-                CustomAttributeGenerators = Image.ReadMappedArray<ulong>(CodeRegistration.customAttributeGenerators, (int) CodeRegistration.customAttributeCount);
+            if (Image.Version < MetadataVersions.V270) {
+                CustomAttributeGenerators = Image.ReadMappedUWordArray(CodeRegistration.CustomAttributeGenerators, (int) CodeRegistration.CustomAttributeCount);
             }
             
             // Method.Invoke function pointers
-            MethodInvokePointers = Image.ReadMappedArray<ulong>(CodeRegistration.invokerPointers, (int) CodeRegistration.invokerPointersCount);
+            MethodInvokePointers = Image.ReadMappedUWordArray(CodeRegistration.InvokerPointers, (int) CodeRegistration.InvokerPointersCount);
 
             // TODO: Function pointers as shown below
             // reversePInvokeWrappers
@@ -408,26 +425,26 @@ namespace Il2CppInspector
             // >=22: unresolvedVirtualCallPointers
             // >=23: interopData
 
-            if (Image.Version < 19) {
-                VTableMethodReferences = Image.ReadMappedArray<uint>(MetadataRegistration.methodReferences, (int)MetadataRegistration.methodReferencesCount);
+            if (Image.Version < MetadataVersions.V190) {
+                VTableMethodReferences = Image.ReadMappedPrimitiveArray<uint>(MetadataRegistration.MethodReferences, (int)MetadataRegistration.MethodReferencesCount);
             }
 
             // Generic type and method specs (open and closed constructed types)
-            MethodSpecs = Image.ReadMappedArray<Il2CppMethodSpec>(MetadataRegistration.methodSpecs, (int) MetadataRegistration.methodSpecsCount);
+            MethodSpecs = Image.ReadMappedVersionedObjectArray<Il2CppMethodSpec>(MetadataRegistration.MethodSpecs, (int) MetadataRegistration.MethodSpecsCount);
 
             // Concrete generic class and method signatures
-            GenericInstances = Image.ReadMappedObjectPointerArray<Il2CppGenericInst>(MetadataRegistration.genericInsts, (int) MetadataRegistration.genericInstsCount);
+            GenericInstances = Image.ReadMappedVersionedObjectPointerArray<Il2CppGenericInst>(MetadataRegistration.GenericInsts, (int) MetadataRegistration.GenericInstsCount);
 
             // Concrete generic method pointers
-            var genericMethodPointers = Image.ReadMappedArray<ulong>(CodeRegistration.genericMethodPointers, (int) CodeRegistration.genericMethodPointersCount);
-            var genericMethodTable = Image.ReadMappedArray<Il2CppGenericMethodFunctionsDefinitions>(MetadataRegistration.genericMethodTable, (int) MetadataRegistration.genericMethodTableCount);
+            var genericMethodPointers = Image.ReadMappedUWordArray(CodeRegistration.GenericMethodPointers, (int) CodeRegistration.GenericMethodPointersCount);
+            var genericMethodTable = Image.ReadMappedVersionedObjectArray<Il2CppGenericMethodFunctionsDefinitions>(MetadataRegistration.GenericMethodTable, (int) MetadataRegistration.GenericMethodTableCount);
             foreach (var tableEntry in genericMethodTable) {
-                GenericMethodPointers.Add(MethodSpecs[tableEntry.genericMethodIndex], genericMethodPointers[tableEntry.indices.methodIndex]);
-                GenericMethodInvokerIndices.Add(MethodSpecs[tableEntry.genericMethodIndex], tableEntry.indices.invokerIndex);
+                GenericMethodPointers.Add(MethodSpecs[tableEntry.GenericMethodIndex], genericMethodPointers[tableEntry.Indices.MethodIndex]);
+                GenericMethodInvokerIndices.Add(MethodSpecs[tableEntry.GenericMethodIndex], tableEntry.Indices.InvokerIndex);
             }
 
-            TypeDefinitionSizes = Image.ReadMappedObjectPointerArray<Il2CppTypeDefinitionSizes>(
-                MetadataRegistration.typeDefinitionsSizes, (int) MetadataRegistration.typeDefinitionsSizesCount);
+            TypeDefinitionSizes = Image.ReadMappedVersionedObjectPointerArray<Il2CppTypeDefinitionSizes>(
+                MetadataRegistration.TypeDefinitionsSizes, (int) MetadataRegistration.TypeDefinitionsSizesCount);
 
             // Plugin hook to pre-process binary
             isModified |= PluginHooks.PostProcessBinary(this).IsStreamModified;

@@ -12,6 +12,7 @@ using System.Linq;
 using Aron.Weiler;
 using Il2CppInspector.Cpp;
 using Il2CppInspector.Cpp.UnityHeaders;
+using Il2CppInspector.Next;
 using Il2CppInspector.Reflection;
 
 namespace Il2CppInspector.Model
@@ -54,7 +55,7 @@ namespace Il2CppInspector.Model
         public Dictionary<ulong, (FieldInfo Field, string Value)> Fields { get; } = [];
         public Dictionary<ulong, (FieldInfo Field, string Value)> FieldRvas { get; } = []; 
 
-        public bool StringIndexesAreOrdinals => Package.Version < 19;
+        public bool StringIndexesAreOrdinals => Package.Version < MetadataVersions.V190;
 
         // The .NET type model for the application
         public TypeModel TypeModel { get; }
@@ -104,7 +105,8 @@ namespace Il2CppInspector.Model
         }
 
         // Initialize
-        public AppModel(TypeModel model, bool makeDefaultBuild = true) {
+        public AppModel(TypeModel model, bool makeDefaultBuild = true)
+        {
             // Save .NET type model
             TypeModel = model;
 
@@ -252,11 +254,11 @@ namespace Il2CppInspector.Model
                         case MetadataUsageType.FieldInfo or MetadataUsageType.FieldRva:
                             var fieldRef = TypeModel.Package.FieldRefs[usage.SourceIndex];
                             var fieldType = TypeModel.GetMetadataUsageType(usage);
-                            var field = fieldType.DeclaredFields.First(f => f.Index == fieldType.Definition.fieldStart + fieldRef.fieldIndex);
+                            var field = fieldType.DeclaredFields.First(f => f.Index == fieldType.Definition.FieldIndex + fieldRef.FieldIndex);
 
                             var value = field.HasFieldRVA
                                 ? Convert.ToHexString(Package.Metadata.ReadBytes(
-                                    (long) field.DefaultValueMetadataAddress, field.FieldType.Sizes.nativeSize))
+                                    (long) field.DefaultValueMetadataAddress, field.FieldType.Sizes.NativeSize))
                                 : "";
 
 
@@ -270,7 +272,7 @@ namespace Il2CppInspector.Model
                 }
 
             // Add string literals for metadata <19 to the model
-            if (Package.Version < 19) {
+            if (Package.Version < MetadataVersions.V190) {
                 /* Version < 19 calls `il2cpp_codegen_string_literal_from_index` to get string literals.
                  * Unfortunately, metadata references are just loose globals in Il2CppMetadataUsage.cpp
                  * so we can't automatically name those. Next best thing is to define an enum for the strings. */
