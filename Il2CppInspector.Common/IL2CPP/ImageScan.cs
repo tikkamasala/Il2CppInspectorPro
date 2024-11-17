@@ -230,7 +230,8 @@ namespace Il2CppInspector
 
                 // genericAdjustorThunks was inserted before invokerPointersCount in 24.5 and 27.1
                 // pointer expected if we need to bump version
-                if (Image.Version == MetadataVersions.V244 && cr.InvokerPointersCount > 0x50000)
+                if (Image.Version == MetadataVersions.V244 && 
+                    (cr.InvokerPointersCount > 0x50000 || cr.ReversePInvokeWrapperCount > cr.ReversePInvokeWrappers))
                 {
                     Image.Version = MetadataVersions.V245;
                     codeRegistration = codeGenEndPtr - (ulong)Il2CppCodeRegistration.Size(Image.Version, Image.Bits == 32);
