@@ -255,7 +255,7 @@ namespace Il2CppInspector.Reflection
         public PropertyInfo GetProperty(string name) => DeclaredProperties.FirstOrDefault(p => p.Name == name);
 
         public MethodBase[] GetVTable() {
-            if (!Definition.IsValid) {
+            if (Definition.IsValid) {
                 MetadataUsage[] vt = Assembly.Model.Package.GetVTable(Definition);
                 MethodBase[] res = new MethodBase[vt.Length];
                 for (int i = 0; i < vt.Length; i++) {
