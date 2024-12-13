@@ -207,8 +207,6 @@ namespace Il2CppInspector
 
         public virtual string Arch => throw new NotImplementedException();
 
-        public virtual int Bits => throw new NotImplementedException();
-
         // Extra parameters to be passed to a loader
         protected LoadOptions LoadOptions;
 
