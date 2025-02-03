@@ -1,12 +1,25 @@
-# Il2CppInspectorRedux 2023.1
+# Il2CppInspectorPro 2025.2
 
-Il2CppInspectorRedux helps you to reverse engineer IL2CPP applications, providing the most complete analysis currently available.
+Il2CppInspectorPro helps you to reverse engineer IL2CPP applications, providing the most complete analysis currently available.
 
 This is a continuation of [Il2CppInspector, by djkaty](https://github.com/djkaty/Il2CppInspector) which has suspended development, and contains some new features and support for new metadata versions.
 
-![Il2CppInspector GUI](docs/GUI_Preview.png)
+![Il2CppInspector GUI](docs/il2cppPro_preview.png)
 
-### Redux only features
+### Pro Features
+
+Enhanced C++ Scaffold Project Features
+
+* Project Name Customization: Users can now specify a custom project name when generating a scaffold.
+
+Customizable Library Support: Ability to include the following libraries in the C++ scaffold project as needed:
+
+* ImGui – GUI support for rendering interfaces
+* Detours – API hooking functionality
+* Version Proxy – Version control and redirection
+* Jadis0x's IL2CPP Resolver – Simplifies calling Unity functions using IL2CPP APIs
+
+### Features
 
 * Support for metadata version 29 and 29.1, with full reconstruction of custom attributes
 * Proper extraction of static array initializer contents with their correct length
@@ -28,29 +41,16 @@ This is a continuation of [Il2CppInspector, by djkaty](https://github.com/djkaty
     - Addition of custom fake string segment to show string literal contents in decompiler
     - A fake xref between MethodInfo instances and their corresponding method to quickly get the correct function
 * Binary Ninja script output, with all of the IDA-exclusive features
-
-### Main features
-
 * Output IL2CPP type definitions, metadata and method pointers as **[C# stub code](#creating-c-prototypes)**
-
 * Create **.NET assembly shim DLLs** containing the IL2CPP application structure and metadata for use in decompilers such as [ILSpy](https://github.com/icsharpcode/ILSpy), [dnSpy](https://github.com/dnSpy/dnSpy), Unity asset loading with [AssetStudio](https://github.com/Perfare/AssetStudio) or managed proxy generation with [Il2CppAssemblyUnhollower](https://github.com/knah/Il2CppAssemblyUnhollower)
-
 * Create **[C++ scaffolding](#creating-c-scaffolding-or-a-dll-injection-project)** for all types, methods, function pointers and API functions in an IL2CPP application for use in x64dbg, Cydia Substrate etc.
-
 * Create **[IDA](#adding-metadata-to-your-ida-workflow), [Ghidra](#adding-metadata-to-your-ghidra-workflow) or [Binary Ninja](#adding-metadata-to-your-binary-ninja-workflow) Python scripts** to populate symbol, function and type information; includes API hooks to [implement scripts for other targets](#extending-il2cppinspectors-python-output-to-support-other-targets)
-
 * Create Visual Studio **[C++ DLL injection projects](#dll-injection-workflow)** directly from IL2CPP files
-
 * Create Visual Studio **[C# code stub solutions](#creating-a-visual-studio-c-code-stubs-solution)** directly from IL2CPP files
-
 * Create **[JSON metadata](#generating-json-metadata)** with a complete address map directly from IL2CPP Files.
-
 * Create **[IL2CPP binaries from arbitrary C# source code without a Unity project](#universal-il2cpp-build-utility)**
-
 * **[Three major APIs](#using-the-apis-for-programmatic-analysis)** for use in your own custom static analysis projects for querying low level binary metadata, the .NET type model and the whole C++ application. These are also available as a [NuGet Package](https://www.nuget.org/packages/NoisyCowStudios.Il2CppInspector/).
-
 * **[Plugin SDK](#creating-plugins)** allows you to create custom plugins to extend Il2CppInspector's capabilities
-
 * Defeats certain types of obfuscation
   - Most types of packed PE files (Windows DLLs)
   - ROT encryption of API export names
@@ -62,11 +62,8 @@ This is a continuation of [Il2CppInspector, by djkaty](https://github.com/djkaty
   - Encryption/obfuscation used in titles by miHoYo ([Honkai Impact 3rd](https://honkaiimpact3.mihoyo.com/) and [Genshin Impact](https://genshin.mihoyo.com/)) (requires [miHoYo plugin](https://github.com/djkaty/Il2CppInspectorPlugins/tree/master/Loaders/miHoYo))
   - For other supported obfuscated titles, see the list of [loader plugins](https://github.com/djkaty/Il2CppInspectorPlugins/tree/master/Loaders)
   - Deobfuscated metadata and binary files can be saved back to disk
-
 * Supports **all major file formats and processor architectures**
-
 * Works on Windows, MacOS X and Linux. **Integrated GUI** for Windows users with drag & drop support
-
 * Tested with [every release of IL2CPP](#version-support) since Unity 5.3.0
 
 ### Tutorials and Guides
@@ -80,6 +77,8 @@ You can read more about how IL2CPP works in my series IL2CPP Reverse Engineering
 [Part 2: Structural Overview & Finding The Metadata](https://katyscode.wordpress.com/2020/12/27/il2cpp-part-2/)
 
 #### Il2CppInspector guides
+
+[Il2cpp Reverse Engineering Guide by Jadis0x](https://github.com/jadis0x/il2cpp-reverse-engineering-guide)
 
 [Il2CppInspector Plugin Development Wiki](https://github.com/djkaty/Il2CppInspector/wiki/Plugins%3A-Getting-Started)
 
