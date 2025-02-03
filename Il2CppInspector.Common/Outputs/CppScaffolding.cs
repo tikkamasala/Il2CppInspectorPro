@@ -1,6 +1,7 @@
 ﻿// Copyright 2020 Robert Xiao - https://robertxiao.ca/
 // Copyright (c) 2020-2021 Katy Coe - http://www.djkaty.com - https://github.com/djkaty
 // Copyright (c) 2023 LukeFZ https://github.com/LukeFZ
+// Copyright (c) 2025 Jadis0x https://github.com/Jadis0x
 // All rights reserved
 
 using System;
@@ -13,28 +14,52 @@ using Il2CppInspector.Cpp;
 using Il2CppInspector.Cpp.UnityHeaders;
 using Il2CppInspector.Model;
 using Il2CppInspector.Properties;
+using System.IO.Compression;
 
 namespace Il2CppInspector.Outputs
 {
-    public partial class CppScaffolding(AppModel model, bool useBetterArraySize = false)
+    public partial class CppScaffolding(AppModel model, bool includeImgui = false, bool includeVersionProxy = false, bool includeIl2cppResolver = false, bool includeDetours = false, string solutionName = "il2cpp-dll", bool useBetterArraySize = false)
     {
         private readonly AppModel _model = model;
+
+        private readonly bool incImGui = includeImgui;
+        private readonly bool incVersionProxy = includeVersionProxy;
+        private readonly bool incIl2cppResolver = includeIl2cppResolver;
+        private readonly bool incDetours = includeDetours;
+        private readonly string _solutionName = solutionName;
 
         /*
          * 2017.2.1 changed the type of il2cpp_array_size_t to uintptr_t from int32_t. The code, however, uses static_cast<int32_t>(maxLength) to access this value,
          * which makes decompilation a bit unpleasant due to it only ever checking the lower 32 bits.
          * The better array size type is a union of the actual size (int32_t) and the actual value (uintptr_t) which should hopefully improve decompilation.
          */
-        private readonly bool _useBetterArraySize = 
-            model.UnityVersion.CompareTo("2017.2.1") >= 0 
-            && model.Package.BinaryImage.Bits == 64 
+        private readonly bool _useBetterArraySize =
+            model.UnityVersion.CompareTo("2017.2.1") >= 0
+            && model.Package.BinaryImage.Bits == 64
             && useBetterArraySize;
 
         private StreamWriter _writer;
 
+        private void ExtractIfEnabled(string sourcePath, string targetPath, string zipFileName, bool isEnabled, string targetFolderName = null)
+        {
+            if (!isEnabled) return;
+
+            string zipFilePath = Path.Combine(sourcePath, zipFileName);
+
+            string folderName = targetFolderName ?? Path.GetFileNameWithoutExtension(zipFileName);
+            string extractPath = Path.Combine(targetPath, folderName);
+
+            if (!File.Exists(zipFilePath)) return;  
+
+           
+            Directory.CreateDirectory(extractPath);
+            ZipFile.ExtractToDirectory(zipFilePath, extractPath, overwriteFiles: true);
+        }
+
         // Write the type header
         // This can be used by other output modules
-        public void WriteTypes(string typeHeaderFile) {
+        public void WriteTypes(string typeHeaderFile)
+        {
             using var fs = new FileStream(typeHeaderFile, FileMode.Create);
             _writer = new StreamWriter(fs, Encoding.ASCII);
 
@@ -131,17 +156,23 @@ namespace Il2CppInspector.Outputs
             }
         }
 
-        public void Write(string projectPath) {
+        public void Write(string projectPath)
+        {
             // Ensure output directory exists and is not a file
             // A System.IOException will be thrown if it's a file'
             var srcUserPath = Path.Combine(projectPath, "user");
             var srcFxPath = Path.Combine(projectPath, "framework");
             var srcDataPath = Path.Combine(projectPath, "appdata");
+            var srcLibraryPath = Path.Combine(projectPath, "libraries");
 
             Directory.CreateDirectory(projectPath);
             Directory.CreateDirectory(srcUserPath);
             Directory.CreateDirectory(srcFxPath);
             Directory.CreateDirectory(srcDataPath);
+            Directory.CreateDirectory(srcLibraryPath);
+
+            string inspectorBasePath = AppDomain.CurrentDomain.BaseDirectory;
+            string inspectorLibrariesPath = Path.Combine(inspectorBasePath, "libraries");
 
             // Write type definitions to il2cpp-types.h
             WriteTypes(Path.Combine(srcDataPath, "il2cpp-types.h"));
@@ -252,6 +283,14 @@ namespace Il2CppInspector.Outputs
                 writeCode($"#define __IL2CPP_METADATA_VERSION {_model.Package.Version.Major * 10 + _model.Package.Version.Minor * 10:F0}");
             }
 
+            if (Directory.Exists(inspectorLibrariesPath))
+            {
+                ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "imgui.zip", incImGui, "imgui");
+                ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "detours.zip", incImGui, "detours");
+                //ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "version-proxy.zip", incVersionProxy);
+                //ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "UnityResolver.zip", incIl2cppResolver, "UnityResolver");
+            }
+
             // Write boilerplate code
             File.WriteAllText(Path.Combine(srcFxPath, "dllmain.cpp"), Resources.Cpp_DLLMainCpp);
             File.WriteAllText(Path.Combine(srcFxPath, "helpers.cpp"), Resources.Cpp_HelpersCpp);
@@ -270,7 +309,7 @@ namespace Il2CppInspector.Outputs
 
             // Write Visual Studio project and solution files
             var projectGuid = Guid.NewGuid();
-            var projectName = "IL2CppDLL";
+            var projectName = _solutionName;
             var projectFile = projectName + ".vcxproj";
 
             WriteIfNotExists(Path.Combine(projectPath, projectFile),
@@ -279,12 +318,15 @@ namespace Il2CppInspector.Outputs
             var guid1 = Guid.NewGuid();
             var guid2 = Guid.NewGuid();
             var guid3 = Guid.NewGuid();
+            var guid4 = Guid.NewGuid();
             var filtersFile = projectFile + ".filters";
 
             var filters = Resources.CppProjFilters
                 .Replace("%GUID1%", guid1.ToString())
                 .Replace("%GUID2%", guid2.ToString())
-                .Replace("%GUID3%", guid3.ToString());
+                .Replace("%GUID3%", guid3.ToString())
+                .Replace("%GUID4%", guid4.ToString())
+                .Replace("%GUID5%", guid4.ToString());
 
             WriteIfNotExists(Path.Combine(projectPath, filtersFile), filters);
 
@@ -300,28 +342,35 @@ namespace Il2CppInspector.Outputs
             WriteIfNotExists(Path.Combine(projectPath, solutionFile), sln);
         }
 
-        private void writeHeader() {
-            writeLine("// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty");
+        private void writeHeader()
+        {
+            writeLine("// Generated C++ file by Il2CppInspectorPro - http://www.djkaty.com - https://github.com/djkaty");
+            writeLine("// Modified by Jadis0x - https://github.com/jadis0x");
             writeLine("// Target Unity version: " + _model.UnityHeaders);
             writeLine("");
         }
 
-        private void writeTypesForGroup(string header, string group) {
+        private void writeTypesForGroup(string header, string group)
+        {
             writeSectionHeader(header);
             foreach (var cppType in _model.GetDependencyOrderedCppTypeGroup(group))
-                if (cppType is CppEnumType) {
+                if (cppType is CppEnumType)
+                {
                     // Ghidra can't process C++ enum base types
                     writeCode("#if defined(_CPLUSPLUS_)");
                     writeCode(cppType.ToString());
                     writeCode("#else");
                     writeCode(cppType.ToString("c"));
                     writeCode("#endif");
-                } else {
+                }
+                else
+                {
                     writeCode(cppType.ToString());
                 }
         }
-        
-        private void writeCode(string text) {
+
+        private void writeCode(string text)
+        {
             if (_model.TargetCompiler == CppCompilerType.MSVC)
                 text = GccAlignRegex().Replace(text, @"__declspec(align($1))");
             else if (_model.TargetCompiler == CppCompilerType.GCC)
@@ -334,7 +383,8 @@ namespace Il2CppInspector.Outputs
                 writeLine(line);
         }
 
-        private void writeSectionHeader(string name) {
+        private void writeSectionHeader(string name)
+        {
             writeLine("// ******************************************************************************");
             writeLine("// * " + name);
             writeLine("// ******************************************************************************");

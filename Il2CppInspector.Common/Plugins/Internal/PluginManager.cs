@@ -113,7 +113,7 @@ namespace Il2CppInspector
         // Global enable/disable flag for entire plugin system
         // If set to false, all plugins will be unloaded
         // Disable this if you want to create standalone apps using the API but without plugins
-        private static bool _enabled = false;
+        private static bool _enabled = true;
 
         public static bool Enabled {
             get => _enabled;
@@ -197,13 +197,10 @@ namespace Il2CppInspector
             // Don't allow the user to start the application if there's no plugins folder
             // REDUX: We allow people to not use plugins since they might be incompatible with the installation
             if (!Directory.Exists(pluginFolder)) {
-                /*throw new DirectoryNotFoundException(
+                throw new DirectoryNotFoundException(
                     "Plugins folder not found. Please ensure you have installed the latest set of plugins before starting. "
-                  + "The plugins folder should be placed in the same directory as Il2CppInspector. "
-                  + "Use get-plugins.ps1 or get-plugins.sh to update your plugins. For more information, see the Il2CppInspector README.md file.");
-                */
-
-                return;
+                  + "The plugins folder should be placed in the same directory as Il2CppInspectorPro. "
+                  + "Use get-plugins.ps1 or get-plugins.sh to update your plugins. For more information, see the Il2CppInspectorPro README.md file.");
             }
 
             // Get every DLL

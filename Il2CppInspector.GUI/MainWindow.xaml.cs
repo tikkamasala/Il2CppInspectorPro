@@ -6,24 +6,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using Il2CppInspector; 
 using Il2CppInspector.Cpp;
@@ -34,7 +25,6 @@ using Il2CppInspector.Reflection;
 using Ookii.Dialogs.Wpf;
 using Path = System.IO.Path;
 using Il2CppInspector.Cpp.UnityHeaders;
-using System.IO.Packaging;
 
 namespace Il2CppInspectorGUI
 {
@@ -573,8 +563,23 @@ namespace Il2CppInspectorGUI
                         OnStatusUpdate(this, $"Building application model for Unity {selectedCppUnityVersion}/{cppCompiler}");
                         model.Build(selectedCppUnityVersion, cppCompiler);
 
+                        bool includeImgui = false;
+                        bool includeVersionProxy = false;
+                        bool includeIl2cppResolver = false;
+                        bool includeDetours = false;
+
+                        string solutionName = "";
+
+                        Dispatcher.Invoke(() => {
+                            includeImgui = chk_Imgui.IsChecked.Value;
+                            includeVersionProxy = chk_VersionProxy.IsChecked.Value;
+                            includeIl2cppResolver = chk_il2cppResolver.IsChecked.Value;
+                            includeDetours = chk_detours.IsChecked.Value;
+                            solutionName = txtSolutionName.Text.Length > 3 ? txtSolutionName.Text.Trim() : "il2cpp-dll";
+                        });
+
                         OnStatusUpdate(this, "Generating C++ scaffolding");
-                        new CppScaffolding(model).Write(cppOutPath);
+                        new CppScaffolding(model, includeImgui, includeVersionProxy, includeIl2cppResolver, includeDetours, solutionName).Write(cppOutPath);
                     });
                     break;
 

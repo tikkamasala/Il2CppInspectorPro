@@ -307,6 +307,46 @@ void Run()
     &lt;/ProjectConfiguration&gt;
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
+  
+  
+ &lt;ClCompile Include="libraries\imgui\imgui.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\imgui\imgui_draw.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\imgui\imgui_impl_dx11.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\imgui\imgui_impl_win32.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\imgui\imgui_tables.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\imgui\imgui_widgets.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  
     &lt;ClCompile Include="framework\dllmain.cpp"&gt;
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
@@ -332,7 +372,7 @@ void Run()
     &lt;ClInclude Include="appdata\il2cpp-api-functions.h" /&gt;
     &lt;ClInclude Include="appdata\il2cpp-api-functions-ptr.h" /&gt;
     &lt;ClInclude Include="appdata\il2cpp-functions.h" /&gt;
-	  &lt;ClInclude Include="appdata\il2cpp-metadata-version.h" /&gt;
+   &lt;ClInclude Include="appdata\il2cpp-metadata-version.h" /&gt;
     &lt;ClInclude Include="appdata\il2cpp-types-ptr.h" /&gt;
     &lt;ClInclude Include="appdata\il2cpp-types.h" /&gt;
     &lt;ClInclude Include="framework\helpers.h" /&gt;
@@ -340,6 +380,15 @@ void Run()
     &lt;ClInclude Include="framework\il2cpp-init.h" /&gt;
     &lt;ClInclude Include="framework\pch-il2cpp.h" /&gt;
     &lt;ClInclude Include="user\main.h" /&gt;
+ 
+ &lt;ClInclude Include="libraries\imgui\imconfig.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imgui.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imgui_internal.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imstb_rectpack.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imstb_textedit.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imstb_truetype.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imgui_impl_dx11.h" /&gt;
+  &lt;ClInclude Include="libraries\imgui\imgui_impl_win32.h" /&gt;
   &lt;/ItemGroup&gt;
   &lt;PropertyGroup Label="Globals"&gt;
     &lt;!--&lt;VCProjectVersion&gt;16.0&lt;/VCProjectVersion&gt;--&gt;
@@ -414,7 +463,7 @@ void Run()
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
-      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user&lt;/AdditionalIncludeDirectories&gt;
+      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
       &lt;SubSystem&gt;Windows&lt;/SubSystem&gt;
@@ -433,7 +482,7 @@ void Run()
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
-      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user&lt;/AdditionalIncludeDirectories&gt;
+      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
       &lt;SubSystem&gt;Windows&lt;/SubSystem&gt;
@@ -452,7 +501,7 @@ void Run()
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
-      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user&lt;/AdditionalIncludeDirectories&gt;
+      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
       &lt;SubSystem&gt;Windows&lt;/SubSystem&gt;
@@ -471,7 +520,7 @@ void Run()
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
-      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user&lt;/AdditionalIncludeDirectories&gt;
+      &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
       &lt;SubSystem&gt;Windows&lt;/SubSystem&gt;
@@ -1314,6 +1363,27 @@ void Run();</value>
     &lt;ClCompile Include="framework\pch-il2cpp.cpp"&gt;
       &lt;Filter&gt;framework&lt;/Filter&gt;
     &lt;/ClCompile&gt;
+ 
+ 
+ &lt;ClCompile Include="libraries\imgui\imgui.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+    &lt;ClCompile Include="libraries\imgui\imgui_draw.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+    &lt;ClCompile Include="libraries\imgui\imgui_impl_dx11.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+    &lt;ClCompile Include="libraries\imgui\imgui_impl_win32.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+ &lt;ClCompile Include="libraries\imgui\imgui_tables.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+    &lt;ClCompile Include="libraries\imgui\imgui_widgets.cpp"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+ 
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
     &lt;ClInclude Include="user\main.h"&gt;
@@ -1349,6 +1419,33 @@ void Run();</value>
     &lt;ClInclude Include="framework\pch-il2cpp.h"&gt;
       &lt;Filter&gt;framework&lt;/Filter&gt;
     &lt;/ClInclude&gt;
+ 
+ 
+ &lt;ClInclude Include="libraries\imgui\imconfig.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imgui.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imgui_internal.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imstb_rectpack.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imstb_textedit.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imstb_truetype.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imgui_impl_dx11.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+    &lt;ClInclude Include="libraries\imgui\imgui_impl_win32.h"&gt;
+      &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+ 
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
     &lt;Filter Include="appdata"&gt;
@@ -1359,6 +1456,13 @@ void Run();</value>
     &lt;/Filter&gt;
     &lt;Filter Include="user"&gt;
       &lt;UniqueIdentifier&gt;{%GUID3%}&lt;/UniqueIdentifier&gt;
+    &lt;/Filter&gt;
+ 
+ &lt;Filter Include="libraries"&gt;
+      &lt;UniqueIdentifier&gt;{%GUID4%}&lt;/UniqueIdentifier&gt;
+    &lt;/Filter&gt;
+    &lt;Filter Include="libraries\imgui"&gt;
+      &lt;UniqueIdentifier&gt;{%GUID5%}&lt;/UniqueIdentifier&gt;
     &lt;/Filter&gt;
   &lt;/ItemGroup&gt;
 &lt;/Project&gt;</value>

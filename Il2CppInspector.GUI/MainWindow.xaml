@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Il2CppInspectorGUI"
         xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
         mc:Ignorable="d"
-        Title="Il2CppInspectorRedux" Height="850" Width="1100" Background="White"
+        Title="Il2CppInspectorPro" Height="850" Width="1100" Background="#FFFDFDFD"
         WindowStartupLocation="CenterScreen"
         ContentRendered="MainWindow_OnContentRendered"
         Drop="MainWindow_OnDrop">
@@ -66,15 +66,18 @@
                 <!-- Footer text -->
                 <TextBlock DockPanel.Dock="Bottom" TextWrapping="WrapWithOverflow" Margin="5">
                     If you find this tool useful, please donate to help support its continued development!<LineBreak/>
+                    
+                    Donate to Jadis0x via <Hyperlink NavigateUri="https://buymeacoffee.com/jadis0x" RequestNavigate="Hyperlink_OnRequestNavigate">BuyMeACoffee</Hyperlink><LineBreak/>
+                    
                     Donate to LukeFZ via <Hyperlink NavigateUri="http://buymeacoffee.com/LukeFZ" RequestNavigate="Hyperlink_OnRequestNavigate">BuyMeACoffee</Hyperlink><LineBreak/>
                     Donate to LukeFZ via <Hyperlink NavigateUri="http://patreon.com/LukeFZ" RequestNavigate="Hyperlink_OnRequestNavigate">Patreon</Hyperlink><LineBreak/>
                     Donate to djkaty via <Hyperlink NavigateUri="http://paypal.me/djkaty" RequestNavigate="Hyperlink_OnRequestNavigate">PayPal</Hyperlink><LineBreak/>
                     Donate to djkaty with bitcoin:<LineBreak/><TextBox IsReadOnly="True">3FoRUqUXgYj8NY8sMQfhX6vv9LqR3e2kzz</TextBox><LineBreak/>
                     <LineBreak/>
-                    <Hyperlink NavigateUri="https://github.com/LukeFZ/Il2CppInspectorRedux" RequestNavigate="Hyperlink_OnRequestNavigate">Il2CppInspectorRedux on GitHub</Hyperlink><LineBreak/>
-                    <Hyperlink NavigateUri="https://github.com/LukeFZ" RequestNavigate="Hyperlink_OnRequestNavigate">https://github.com/LukeFZ</Hyperlink><LineBreak/>
+                    <Hyperlink NavigateUri="https://github.com/jadis0x/Il2CppInspectorPro" RequestNavigate="Hyperlink_OnRequestNavigate">Il2CppInspectorPro on GitHub</Hyperlink><LineBreak/>
+                    <Hyperlink NavigateUri="https://github.com/Jadis0x" RequestNavigate="Hyperlink_OnRequestNavigate">https://github.com/Jadis0x</Hyperlink><LineBreak/>
                     <Hyperlink NavigateUri="http://www.djkaty.com" RequestNavigate="Hyperlink_OnRequestNavigate">www.djkaty.com</Hyperlink><LineBreak/>
-                    &#169; Katy Coe 2017-2021, LukeFZ 2023
+                    &#169; Katy Coe 2017-2021, LukeFZ 2023, Jadis0x 2025
                 </TextBlock>
 
                 <!-- Image details view -->
@@ -115,7 +118,7 @@
                     <Label Grid.Row="8" Grid.Column="0" Content="Il2CppCodeRegistration function"></Label>
                     <Label Grid.Row="8" Grid.Column="1" Content="{Binding Path=Binary.RegistrationFunctionPointer}" ContentStringFormat="0x{0:x8}"></Label>
                 </Grid>
-                
+
                 <!-- Unity asset file button -->
                 <Button Name="btnUnityAsset" Click="BtnUnityAsset_Click" DockPanel.Dock="Top" Margin="10" Padding="5" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="14" Width="260" Content="Get Unity version from asset file..." Style="{StaticResource LightBoxButton}"/>
 
@@ -218,183 +221,210 @@
                             <Button Margin="2,0,5,0" Width="103" Click="SelectAllNamespaces_Click">Select all</Button>
                             <Button Width="103" Click="SelectNoneNamespaces_Click">Select none</Button>
                         </StackPanel>
-                        
+
                         <TreeView DockPanel.Dock="Bottom" Name="trvNamespaces" ItemTemplate="{StaticResource NamespaceTreeItemTemplate}" Width="210" Margin="10,5,5,5"></TreeView>
                     </DockPanel>
 
                     <!-- Settings -->
                     <ScrollViewer Padding="6">
-                    <StackPanel DockPanel.Dock="Left">
-                        <Label Foreground="{StaticResource WindowsBlue}" FontSize="18">Configure output</Label>
+                        <StackPanel DockPanel.Dock="Left">
+                            <Label Foreground="{StaticResource WindowsBlue}" FontSize="18">Configure output</Label>
 
-                        <!-- C# code stubs output -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputCSharp" IsChecked="True" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">C# prototypes</RadioButton>
-                        <GroupBox Header="Layout" Margin="5" Padding="5">
-                            <StackPanel>
-                                <StackPanel.Style>
+                            <!-- C# code stubs output -->
+                            <RadioButton GroupName="grpOutputType" Name="rdoOutputCSharp" IsChecked="True" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">C# prototypes</RadioButton>
+                            <GroupBox Header="Layout" Margin="5" Padding="5">
+                                <StackPanel>
+                                    <StackPanel.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Control.IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <RadioButton Name="rdoLayoutSingle" IsChecked="True">Single file</RadioButton>
+                                    <RadioButton Name="rdoLayoutNamespace">File per namespace</RadioButton>
+                                    <RadioButton Name="rdoLayoutAssembly">File per assembly</RadioButton>
+                                    <RadioButton Name="rdoLayoutClass">File per class</RadioButton>
+                                    <RadioButton Name="rdoLayoutTree" Content="Tree layout">
+                                        <RadioButton.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
+                                                        <Setter Property="RadioButton.IsChecked" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </RadioButton.Style>
+                                    </RadioButton>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <CheckBox Name="cbFlattenHierarchy" Margin="2" Content="Don't nest folders (flatten hierarchy)">
+                                <CheckBox.Style>
                                     <Style>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutSingle, Path=IsChecked}" Value="True">
+                                                <Setter Property="Control.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutAssembly, Path=IsChecked}" Value="True">
                                                 <Setter Property="Control.IsEnabled" Value="False"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </StackPanel.Style>
+                                </CheckBox.Style>
+                            </CheckBox>
 
-                                <RadioButton Name="rdoLayoutSingle" IsChecked="True">Single file</RadioButton>
-                                <RadioButton Name="rdoLayoutNamespace">File per namespace</RadioButton>
-                                <RadioButton Name="rdoLayoutAssembly">File per assembly</RadioButton>
-                                <RadioButton Name="rdoLayoutClass">File per class</RadioButton>
-                                <RadioButton Name="rdoLayoutTree" Content="Tree layout">
-                                    <RadioButton.Style>
-                                        <Style>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
-                                                    <Setter Property="RadioButton.IsChecked" Value="True"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </RadioButton.Style>
+                            <!-- Sorting (only available with single file, namespace and assembly output -->
+                            <GroupBox Margin="5" Padding="5">
+                                <!-- Replace TextBlock with Label in header template so that it greys out when the GroupBox is disabled -->
+                                <GroupBox.Header>
+                                    <Label Content="Type sorting" Padding="0"/>
+                                </GroupBox.Header>
+                                <GroupBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutClass, Path=IsChecked}" Value="True">
+                                                <Setter Property="Control.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutTree, Path=IsChecked}" Value="True">
+                                                <Setter Property="Control.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GroupBox.Style>
+                                <StackPanel>
+                                    <RadioButton Name="rdoSortName" IsChecked="True">Alphabetical</RadioButton>
+                                    <RadioButton Name="rdoSortIndex">Type definition index</RadioButton>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <CheckBox Name="cbSuppressMetadata" Margin="2">Suppress pointer, offset and index metadata comments</CheckBox>
+                            <CheckBox Name="cbMustCompile" Margin="2" Content="Attempt to generate output that compiles">
+                                <CheckBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
+                                                <Setter Property="CheckBox.IsChecked" Value="True"/>
+                                                <Setter Property="Control.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
+
+                            <CheckBox Name="cbSeparateAttributes" Margin="2" Content="Place assembly-level attributes in separate files">
+                                <CheckBox.Style>
+                                    <Style>
+                                        <Setter Property="CheckBox.IsChecked" Value="True"/>
+                                        <Setter Property="Control.IsEnabled" Value="False"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutAssembly, Path=IsChecked}" Value="True">
+                                                <Setter Property="Control.IsEnabled" Value="True"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=rdoLayoutTree, Path=IsChecked}" Value="True">
+                                                <Setter Property="Control.IsEnabled" Value="True"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
+                                                <Setter Property="CheckBox.IsChecked" Value="True"/>
+                                                <Setter Property="Control.IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                            </CheckBox>
+
+                            <Separator Margin="5,15,5,15"/>
+
+                            <!-- Visual Studio solution -->
+                            <RadioButton GroupName="grpOutputType" Name="rdoOutputSolution" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">Visual Studio solution</RadioButton>
+                            <TextBlock TextWrapping="WrapWithOverflow">Uses the settings above but forces tree layout, compilable output and separate assembly attributes</TextBlock>
+                            <DockPanel>
+                                <Button Name="btnUnityPath" DockPanel.Dock="Right" Width="70" Margin="4" Click="BtnUnityPath_OnClick">Browse</Button>
+                                <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center">Unity editor path:</Label>
+                                <TextBlock Name="txtUnityPath" DockPanel.Dock="Left" VerticalAlignment="Center" FlowDirection="RightToLeft" HorizontalAlignment="Right" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Button Name="btnUnityScriptPath" DockPanel.Dock="Right" Width="70" Margin="4" Click="BtnUnityScriptPath_OnClick">Browse</Button>
+                                <Label DockPanel.Dock="Left" Width="240" VerticalAlignment="Center">Unity script assemblies path:</Label>
+                                <TextBlock Name="txtUnityScriptPath" DockPanel.Dock="Left" VerticalAlignment="Center" FlowDirection="RightToLeft" HorizontalAlignment="Right" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
+                            </DockPanel>
+
+                            <Separator Margin="5,15,5,15"/>
+
+                            <!-- Assembly shim DLLs -->
+                            <RadioButton GroupName="grpOutputType" Name="rdoOutputDll" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">.NET assembly shim DLLs</RadioButton>
+
+                            <CheckBox Name="cbSuppressDllMetadata" Margin="2,10,2,2">Suppress output of all metadata attributes</CheckBox>
+
+                            <Separator Margin="5,15,5,15"/>
+
+                            <!-- Python script -->
+                            <RadioButton GroupName="grpOutputType" Name="rdoOutputPy" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">Python script for disassemblers</RadioButton>
+                            <DockPanel>
+                                <ComboBox Name="cboPyUnityVersion" DockPanel.Dock="Right" Margin="4"></ComboBox>
+                                <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Unity version (if known):</Label>
+                            </DockPanel>
+                            <DockPanel>
+                                <ComboBox Name="cboPyTarget" DockPanel.Dock="Right" Margin="4" Width="80"></ComboBox>
+                                <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Script target:</Label>
+                            </DockPanel>
+
+                            <Separator Margin="5,15,5,15"/>
+
+                            <!-- C++ scaffolding -->
+                            <StackPanel Margin="4" Orientation="Vertical">
+                                <!-- Başlık -->
+                                <RadioButton GroupName="grpOutputType" Name="rdoOutputCpp" VerticalContentAlignment="Center"
+                 FontSize="18" Foreground="{StaticResource MicrosoftGreen}">
+                                    C++ scaffolding / DLL injection project
                                 </RadioButton>
+
+                                <!-- Unity Version Seçimi -->
+                                <DockPanel LastChildFill="True" Margin="0,4,0,0">
+                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Center">Unity version (if known):</Label>
+                                    <ComboBox Name="cboCppUnityVersion" Margin="4"/>
+                                </DockPanel>
+
+                                <!-- C++ Compiler Seçimi -->
+                                <DockPanel LastChildFill="True" Margin="0,4,0,0">
+                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Center">Target C++ compiler for output:</Label>
+                                    <ComboBox Name="cboCppCompiler" DockPanel.Dock="Right" Margin="4">
+                                        <ComboBoxItem IsSelected="True">MSVC</ComboBoxItem>
+                                        <ComboBoxItem>GCC</ComboBoxItem>
+                                    </ComboBox>
+                                </DockPanel>
+
+                                <!-- Project Name -->
+                                <DockPanel LastChildFill="True" Margin="0,4,0,0">
+                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Center">Project Name:</Label>
+                                    <TextBox Name="txtSolutionName" Margin="4"/>
+                                </DockPanel>
+
+                                <!-- Library -->
+                                <DockPanel LastChildFill="True" Margin="0,8,0,0">
+                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Top">Libraries to be included:</Label>
+                                    <StackPanel Orientation="Vertical" Margin="4,0,0,0">
+                                        <CheckBox Name="chk_Imgui" Content="Dear ImGui" Margin="2"/>
+                                        <CheckBox Name="chk_detours" Content="Detours" Margin="2"/>
+                                        <CheckBox Name="chk_VersionProxy" Content="Version Proxy" Margin="2"/>
+                                        <CheckBox Name="chk_il2cppResolver" Content="Jadis0x's IL2CPP Resolver" Margin="2"/>
+                                    </StackPanel>
+                                </DockPanel>
                             </StackPanel>
-                        </GroupBox>
 
-                        <CheckBox Name="cbFlattenHierarchy" Margin="2" Content="Don't nest folders (flatten hierarchy)">
-                            <CheckBox.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutSingle, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutAssembly, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </CheckBox.Style>
-                        </CheckBox>
+                            <Separator Margin="5,15,5,15"/>
 
-                        <!-- Sorting (only available with single file, namespace and assembly output -->
-                        <GroupBox Margin="5" Padding="5">
-                            <!-- Replace TextBlock with Label in header template so that it greys out when the GroupBox is disabled -->
-                            <GroupBox.Header>
-                                <Label Content="Type sorting" Padding="0"/>
-                            </GroupBox.Header>
-                            <GroupBox.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutClass, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutTree, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </GroupBox.Style>
-                            <StackPanel>
-                                <RadioButton Name="rdoSortName" IsChecked="True">Alphabetical</RadioButton>
-                                <RadioButton Name="rdoSortIndex">Type definition index</RadioButton>
-                            </StackPanel>
-                        </GroupBox>
+                            <!-- JSON metadata -->
+                            <RadioButton GroupName="grpOutputType" Name="rdoOutputJSON" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">JSON metadata</RadioButton>
+                            <DockPanel>
+                                <ComboBox Name="cboJsonUnityVersion" DockPanel.Dock="Right" Margin="4"></ComboBox>
+                                <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Unity version (if known):</Label>
+                            </DockPanel>
 
-                        <CheckBox Name="cbSuppressMetadata" Margin="2">Suppress pointer, offset and index metadata comments</CheckBox>
-                        <CheckBox Name="cbMustCompile" Margin="2" Content="Attempt to generate output that compiles">
-                            <CheckBox.Style>
-                                <Style>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
-                                            <Setter Property="CheckBox.IsChecked" Value="True"/>
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </CheckBox.Style>
-                        </CheckBox>
-
-                        <CheckBox Name="cbSeparateAttributes" Margin="2" Content="Place assembly-level attributes in separate files">
-                            <CheckBox.Style>
-                                <Style>
-                                    <Setter Property="CheckBox.IsChecked" Value="True"/>
-                                    <Setter Property="Control.IsEnabled" Value="False"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutAssembly, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="True"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=rdoLayoutTree, Path=IsChecked}" Value="True">
-                                            <Setter Property="Control.IsEnabled" Value="True"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ElementName=rdoOutputSolution, Path=IsChecked}" Value="True">
-                                            <Setter Property="CheckBox.IsChecked" Value="True"/>
-                                            <Setter Property="Control.IsEnabled" Value="False"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </CheckBox.Style>
-                        </CheckBox>
-
-                        <Separator Margin="5,15,5,15"/>
-
-                        <!-- Visual Studio solution -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputSolution" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">Visual Studio solution</RadioButton>
-                        <TextBlock TextWrapping="WrapWithOverflow">Uses the settings above but forces tree layout, compilable output and separate assembly attributes</TextBlock>
-                        <DockPanel>
-                            <Button Name="btnUnityPath" DockPanel.Dock="Right" Width="70" Margin="4" Click="BtnUnityPath_OnClick">Browse</Button>
-                            <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center">Unity editor path:</Label>
-                            <TextBlock Name="txtUnityPath" DockPanel.Dock="Left" VerticalAlignment="Center" FlowDirection="RightToLeft" HorizontalAlignment="Right" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-                        </DockPanel>
-                        <DockPanel>
-                            <Button Name="btnUnityScriptPath" DockPanel.Dock="Right" Width="70" Margin="4" Click="BtnUnityScriptPath_OnClick">Browse</Button>
-                            <Label DockPanel.Dock="Left" Width="240" VerticalAlignment="Center">Unity script assemblies path:</Label>
-                            <TextBlock Name="txtUnityScriptPath" DockPanel.Dock="Left" VerticalAlignment="Center" FlowDirection="RightToLeft" HorizontalAlignment="Right" ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
-                        </DockPanel>
-
-                        <Separator Margin="5,15,5,15"/>
-
-                        <!-- Assembly shim DLLs -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputDll" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">.NET assembly shim DLLs</RadioButton>
-
-                        <CheckBox Name="cbSuppressDllMetadata" Margin="2,10,2,2">Suppress output of all metadata attributes</CheckBox>
-
-                        <Separator Margin="5,15,5,15"/>
-
-                        <!-- Python script -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputPy" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">Python script for disassemblers</RadioButton>
-                        <DockPanel>
-                            <ComboBox Name="cboPyUnityVersion" DockPanel.Dock="Right" Margin="4"></ComboBox>
-                            <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Unity version (if known):</Label>
-                        </DockPanel>
-                        <DockPanel>
-                            <ComboBox Name="cboPyTarget" DockPanel.Dock="Right" Margin="4" Width="80"></ComboBox>
-                            <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Script target:</Label>
-                        </DockPanel>
-
-                        <Separator Margin="5,15,5,15"/>
-
-                        <!-- C++ scaffolding -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputCpp" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">C++ scaffolding / DLL injection project</RadioButton>
-                        <DockPanel>
-                            <ComboBox Name="cboCppUnityVersion" DockPanel.Dock="Right" Margin="4"></ComboBox>
-                            <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Center" HorizontalAlignment="Left">Unity version (if known):</Label>
-                        </DockPanel>
-                        <DockPanel>
-                            <ComboBox Name="cboCppCompiler" DockPanel.Dock="Right" Margin="4" Width="80">
-                                <ComboBoxItem IsSelected="True">MSVC</ComboBoxItem>
-                                <ComboBoxItem>GCC</ComboBoxItem>
-                            </ComboBox>
-                            <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Center" HorizontalAlignment="Left">Target C++ compiler for output:</Label>
-                        </DockPanel>
-
-                        <Separator Margin="5,15,5,15"/>
-                            
-                        <!-- JSON metadata -->
-                        <RadioButton GroupName="grpOutputType" Name="rdoOutputJSON" VerticalContentAlignment="Center" FontSize="18" Foreground="{StaticResource MicrosoftGreen}">JSON metadata</RadioButton>
-                        <DockPanel>
-                            <ComboBox Name="cboJsonUnityVersion" DockPanel.Dock="Right" Margin="4"></ComboBox>
-                            <Label DockPanel.Dock="Left" Width="170" VerticalAlignment="Center" HorizontalAlignment="Left">Unity version (if known):</Label>
-                        </DockPanel>
-
-                    </StackPanel>
+                        </StackPanel>
                     </ScrollViewer>
                 </DockPanel>
             </DockPanel>
@@ -428,9 +458,27 @@
                 <RowDefinition Height ="Auto" />
             </Grid.RowDefinitions>
 
-            <Button Grid.Row="0" Name="btnSelectMetadataFile" Style="{StaticResource LightBoxButton}" Margin="100,100,100,25" Click="BtnSelectMetadataFile_OnClick">
+            <Button Grid.Row="0" Name="btnSelectMetadataFile" Style="{StaticResource LightBoxButton}" Margin="100,100,100,25" Click="BtnSelectMetadataFile_OnClick" Background="White" BorderBrush="#FF5ED6FF" Width="800" Height="238.05">
+                <Button.Foreground>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="Black"/>
+                        <GradientStop Color="#FF8E8E8E" Offset="1"/>
+                    </LinearGradientBrush>
+                </Button.Foreground>
                 <TextBlock TextAlignment="Center">
-                    <TextBlock FontSize="22">Option 1</TextBlock>
+                    <TextBlock.Foreground>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="Black"/>
+                            <GradientStop Color="#FF777777" Offset="1"/>
+                        </LinearGradientBrush>
+                    </TextBlock.Foreground>
+                    <TextBlock FontSize="22" FontWeight="Bold">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="Black"/>
+                                <GradientStop Color="#FFB1B1B1" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>Option 1</TextBlock>
                     <LineBreak/>
                     <TextBlock>Select or drag &amp; drop an IL2CPP metadata file</TextBlock>
                     <LineBreak/>
@@ -439,20 +487,32 @@
             </Button>
             <Button Grid.Row="1" Name="btnSelectPackageFile" Style="{StaticResource LightBoxButton}" Margin="100,75,100,50" Click="BtnSelectPackageFile_OnClick">
                 <TextBlock TextAlignment="Center">
-                    <TextBlock FontSize="22">Option 2</TextBlock>
+                    <TextBlock FontSize="22" FontWeight="Bold">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="Black"/>
+                                <GradientStop Color="#FFB1B1B1" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>Option 2</TextBlock>
                     <LineBreak/>
-                    <TextBlock>Select or drag &amp; drop one or more APK files,<LineBreak/>an XAPK, AAB, IPA or Zip file</TextBlock>
+                    <TextBlock>
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="Black"/>
+                                <GradientStop Color="#FF777777" Offset="1"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>Select or drag &amp; drop one or more APK files,<LineBreak/>an XAPK, AAB, IPA or Zip file</TextBlock>
                     <LineBreak/>
-                    <TextBlock FontSize="16">Encrypted IPA files are not supported</TextBlock>
+                    <TextBlock FontSize="16" Foreground="#FFB53333" FontWeight="Bold">Encrypted IPA files are not supported</TextBlock>
                 </TextBlock>
             </Button>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <!-- Plugin options -->
-                <Button Name="btnPluginOptions" Style="{StaticResource LightBoxButton}" Click="BtnPluginOptions_Click" Margin="0,0,10,10" Padding="5" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="18" Width="180" Content="Manage plugins..."/>
+                <Button Name="btnPluginOptions" Style="{StaticResource LightBoxButton}" Click="BtnPluginOptions_Click" Margin="0,0,10,10" Padding="5" VerticalAlignment="Bottom" FontSize="18" Width="200" Content="Manage plugins..." Height="60" Background="White" BorderBrush="Black" Foreground="#FF404040"/>
 
                 <!-- Load options -->
-                <Button Name="btnLoadOptions" Style="{StaticResource LightBoxButton}" Click="BtnLoadOptions_Click" Margin="0,0,10,10" Padding="5" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="18" Width="180" Content="Import options..."/>
+                <Button Name="btnLoadOptions" Style="{StaticResource LightBoxButton}" Click="BtnLoadOptions_Click" Margin="0,0,10,10" Padding="5" VerticalAlignment="Bottom" FontSize="18" Width="200" Content="Import options..." Height="60" BorderBrush="Black" Foreground="#FF404040"/>
             </StackPanel>
         </Grid>
         <Button Name="btnSelectBinaryFile" Style="{StaticResource LightBoxButton}" Margin="100" Click="BtnSelectBinaryFile_OnClick" Visibility="Hidden">

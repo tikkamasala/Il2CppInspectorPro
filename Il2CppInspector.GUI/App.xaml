@@ -4,8 +4,8 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <!-- Our favourite colours -->
-        <SolidColorBrush x:Key="MicrosoftBlue" Color="#00A2ED"/>
-        <SolidColorBrush x:Key="MicrosoftGreen" Color="#7DB700"/>
+        <SolidColorBrush x:Key="MicrosoftBlue" Color="#3765a1"/>
+        <SolidColorBrush x:Key="MicrosoftGreen" Color="#2e97a3"/>
         <SolidColorBrush x:Key="WindowsBlue" Color="#357EC7"/>
 
         <!-- Light box button -->

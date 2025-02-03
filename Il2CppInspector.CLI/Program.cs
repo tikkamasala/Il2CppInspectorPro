@@ -30,6 +30,7 @@ namespace Il2CppInspector.CLI
         private const string JsonOutDefault = "metadata.json";
         private const string DllOutDefault = "dll";
 
+
         private class Options
         {
             [Option('i', "bin", Required = false, Separator = ',', HelpText = "IL2CPP binary, APK, AAB, XAPK, IPA, Zip or Linux process map text input file(s) (single file or comma-separated list for split APKs)", Default = new[] { "libil2cpp.so" })]

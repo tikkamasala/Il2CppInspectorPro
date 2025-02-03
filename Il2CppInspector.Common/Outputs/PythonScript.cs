@@ -19,16 +19,18 @@ namespace Il2CppInspector.Outputs
         public PythonScript(AppModel model) => this.model = model;
 
         // Get list of available script targets
-        public static IEnumerable<string> GetAvailableTargets() {
+        public static IEnumerable<string> GetAvailableTargets()
+        {
             var ns = typeof(PythonScript).Namespace + ".ScriptResources.Targets";
             var res = ResourceHelper.GetNamesForNamespace(ns);
             return res
                 .Select(s => Path.GetFileNameWithoutExtension(s[(ns.Length + 1)..]))
                 .OrderBy(s => s);
         }
-        
+
         // Output script file
-        public void WriteScriptToFile(string outputFile, string target, string existingTypeHeaderFIle = null, string existingJsonMetadataFile = null) {
+        public void WriteScriptToFile(string outputFile, string target, string existingTypeHeaderFIle = null, string existingJsonMetadataFile = null)
+        {
 
             // Check that target script API is valid
             if (!GetAvailableTargets().Contains(target))
@@ -67,16 +69,16 @@ namespace Il2CppInspector.Outputs
             File.WriteAllText(outputFile, script);
         }
 
-        private void writeTypes(string typeHeaderFile) => new CppScaffolding(model, useBetterArraySize: true).WriteTypes(typeHeaderFile);
+        private void writeTypes(string typeHeaderFile) => new CppScaffolding(model, includeImgui: false, includeVersionProxy: false, includeIl2cppResolver: false, useBetterArraySize: true).WriteTypes(typeHeaderFile);
 
         private void writeJsonMetadata(string jsonMetadataFile) => new JSONMetadata(model).Write(jsonMetadataFile);
 
         private string getRelativePath(string from, string to) =>
             Path.GetRelativePath(Path.GetDirectoryName(Path.GetFullPath(from))!,
                                            Path.GetDirectoryName(Path.GetFullPath(to))!)
-                                         + '/' 
-                                        // We do not use Path.DirectorySeparatorChar here as scripts might be generated on windows then ran on linux,
-                                        // and / is cross-compatible
+                                         + '/'
+                                         // We do not use Path.DirectorySeparatorChar here as scripts might be generated on windows then ran on linux,
+                                         // and / is cross-compatible
                                          + Path.GetFileName(to);
     }
 }
