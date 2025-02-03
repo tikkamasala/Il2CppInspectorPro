@@ -118,33 +118,72 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Cpp-DLLMainCpp" xml:space="preserve">
-    <value>// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
-// DLL entry point
+    <value>// Generated C++ file by Il2CppInspectorPro - https://github.com/jadis0x
+// Custom injected code entry point
+
+#include "pch-il2cpp.h"
 
 #define WIN32_LEAN_AND_MEAN
-#include &lt;windows.h&gt;
-#include "il2cpp-init.h"
+#include &lt;Windows.h&gt;
+#include &lt;iostream&gt;
+#include "il2cpp-appdata.h"
+#include "helpers.h"
 #include "main.h"
+#include &lt;il2cpp-init.h&gt;
 
-// DLL entry point
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+using namespace app;
+
+// Set the name of your log file here
+extern const LPCWSTR LOG_FILE = L"Logs.txt";
+
+HMODULE hModule;
+HANDLE hUnloadEvent;
+
+// Custom injected code entry point
+void Run(LPVOID lpParam)
 {
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-        init_il2cpp();
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) Run, NULL, 0, NULL);
-        break;
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
-}</value>
+ hModule = (HMODULE)lpParam;
+
+ // If you would like to write to a log file, specify the name above and use il2cppi_log_write()
+ // il2cppi_log_write("Startup");
+
+ // If you would like to output to a new console window, use il2cppi_new_console() to open one and redirect stdout
+ il2cppi_new_console();
+ SetConsoleTitleA("Example App");
+
+ init_il2cpp();
+ hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+ if (hUnloadEvent == NULL) {
+  std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
+  return;
+ }
+
+ std::cout &lt;&lt; "[INFO] Initializing.. " &lt;&lt; std::endl;
+
+ // Initialize thread data - DO NOT REMOVE
+ Il2CppDomain* _domain = il2cpp_domain_get();
+ Il2CppThread* _thread = nullptr;
+
+ // Check if IL2CPP domain is found
+ if (_domain) {
+  std::cout &lt;&lt; "[INFO] IL2CPP Domain Found: " &lt;&lt; _domain &lt;&lt; std::endl;
+
+  // Attach thread to IL2CPP domain
+  _thread = il2cpp_thread_attach(_domain);
+
+  if (_thread) {
+   std::cout &lt;&lt; "[INFO] IL2CPP Thread Attached Successfully: " &lt;&lt; _thread &lt;&lt; std::endl;
+  }
+  else {
+   std::cout &lt;&lt; "[ERROR] Failed to Attach IL2CPP Thread!" &lt;&lt; std::endl;
+  }
+ }
+ else {
+  std::cout &lt;&lt; "[ERROR] IL2CPP Domain Not Found!" &lt;&lt; std::endl;
+ }
+}
+
+</value>
   </data>
   <data name="Cpp-HelpersCpp" xml:space="preserve">
     <value>// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
@@ -254,7 +293,7 @@ template&lt;typename T&gt; std::string to_hex_string(T i) {
 void init_il2cpp();</value>
   </data>
   <data name="Cpp-MainCpp" xml:space="preserve">
-    <value>// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
+    <value>// Generated C++ file by Il2CppInspectorPro - https://github.com/jadis0x
 // Custom injected code entry point
 
 #include "pch-il2cpp.h"
@@ -264,26 +303,43 @@ void init_il2cpp();</value>
 #include &lt;iostream&gt;
 #include "il2cpp-appdata.h"
 #include "helpers.h"
+#include "main.h"
+#include &lt;il2cpp-init.h&gt;
 
 using namespace app;
 
 // Set the name of your log file here
-extern const LPCWSTR LOG_FILE = L"il2cpp-log.txt";
+extern const LPCWSTR LOG_FILE = L"Logs.txt";
+
+HMODULE hModule;
+HANDLE hUnloadEvent;
 
 // Custom injected code entry point
-void Run()
+void Run(LPVOID lpParam)
 {
-    // Initialize thread data - DO NOT REMOVE
-    il2cpp_thread_attach(il2cpp_domain_get());
-
+    hModule = (HMODULE)lpParam;
+   
     // If you would like to write to a log file, specify the name above and use il2cppi_log_write()
     // il2cppi_log_write("Startup");
 
     // If you would like to output to a new console window, use il2cppi_new_console() to open one and redirect stdout
-    // il2cppi_new_console();
+    il2cppi_new_console();
+    SetConsoleTitleA("Example App");
+
+    init_il2cpp();
+    hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (hUnloadEvent == NULL) {
+        std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
+        return;
+    }
+
+    // Initialize thread data - DO NOT REMOVE
+    il2cpp_thread_attach(il2cpp_domain_get());
 
     // Place your custom code here
-}</value>
+}
+
+</value>
   </data>
   <data name="CppProjTemplate" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -307,6 +363,25 @@ void Run()
     &lt;/ProjectConfiguration&gt;
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
+  
+  &lt;ClCompile Include="libraries\detours\detours.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\detours\disasm.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  &lt;ClCompile Include="libraries\detours\modules.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
   
   
  &lt;ClCompile Include="libraries\imgui\imgui.cpp"&gt;
@@ -366,6 +441,13 @@ void Run()
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;Create&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;Create&lt;/PrecompiledHeader&gt;
     &lt;/ClCompile&gt;
+ 
+  &lt;ClCompile Include="framework\version.cpp"&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;Create&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;Create&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;Create&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;Create&lt;/PrecompiledHeader&gt;
+    &lt;/ClCompile&gt;
     &lt;ClCompile Include="user\main.cpp" /&gt;
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
@@ -379,6 +461,7 @@ void Run()
     &lt;ClInclude Include="framework\il2cpp-appdata.h" /&gt;
     &lt;ClInclude Include="framework\il2cpp-init.h" /&gt;
     &lt;ClInclude Include="framework\pch-il2cpp.h" /&gt;
+    &lt;ClInclude Include="framework\version.h" /&gt;
     &lt;ClInclude Include="user\main.h" /&gt;
  
  &lt;ClInclude Include="libraries\imgui\imconfig.h" /&gt;
@@ -389,7 +472,15 @@ void Run()
   &lt;ClInclude Include="libraries\imgui\imstb_truetype.h" /&gt;
   &lt;ClInclude Include="libraries\imgui\imgui_impl_dx11.h" /&gt;
   &lt;ClInclude Include="libraries\imgui\imgui_impl_win32.h" /&gt;
+  
+  &lt;ClInclude Include="libraries\detours\detours.h" /&gt;
+  
   &lt;/ItemGroup&gt;
+  
+  &lt;ItemGroup&gt;
+    &lt;None Include="version.def" /&gt;
+  &lt;/ItemGroup&gt;
+  
   &lt;PropertyGroup Label="Globals"&gt;
     &lt;!--&lt;VCProjectVersion&gt;16.0&lt;/VCProjectVersion&gt;--&gt;
     &lt;Keyword&gt;Win32Proj&lt;/Keyword&gt;
@@ -454,6 +545,16 @@ void Run()
   &lt;PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;
     &lt;LinkIncremental&gt;false&lt;/LinkIncremental&gt;
   &lt;/PropertyGroup&gt;
+  
+   &lt;PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;
+    &lt;LinkIncremental&gt;true&lt;/LinkIncremental&gt;
+    &lt;TargetName&gt;version&lt;/TargetName&gt;
+  &lt;/PropertyGroup&gt;
+  &lt;PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;
+    &lt;LinkIncremental&gt;false&lt;/LinkIncremental&gt;
+    &lt;TargetName&gt;version&lt;/TargetName&gt;
+  &lt;/PropertyGroup&gt;
+  
   &lt;ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;
     &lt;ClCompile&gt;
       &lt;WarningLevel&gt;Level3&lt;/WarningLevel&gt;
@@ -496,17 +597,20 @@ void Run()
     &lt;ClCompile&gt;
       &lt;WarningLevel&gt;Level3&lt;/WarningLevel&gt;
       &lt;SDLCheck&gt;true&lt;/SDLCheck&gt;
-      &lt;PreprocessorDefinitions&gt;_DEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)&lt;/PreprocessorDefinitions&gt;
+      &lt;PreprocessorDefinitions&gt;_DEBUG;_VERSION;IL2CPPDLL_EXPORTS;_WINDOWS;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_USRDLL;%(PreprocessorDefinitions)&lt;/PreprocessorDefinitions&gt;
       &lt;ConformanceMode&gt;true&lt;/ConformanceMode&gt;
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
+  &lt;LanguageStandard&gt;stdcpp17&lt;/LanguageStandard&gt;
       &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
       &lt;SubSystem&gt;Windows&lt;/SubSystem&gt;
       &lt;GenerateDebugInformation&gt;true&lt;/GenerateDebugInformation&gt;
       &lt;EnableUAC&gt;false&lt;/EnableUAC&gt;
+   &lt;ModuleDefinitionFile&gt;version.def&lt;/ModuleDefinitionFile&gt;
+      &lt;AdditionalDependencies&gt;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;kernel32.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)&lt;/AdditionalDependencies&gt;
     &lt;/Link&gt;
   &lt;/ItemDefinitionGroup&gt;
   &lt;ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;
@@ -515,11 +619,12 @@ void Run()
       &lt;FunctionLevelLinking&gt;true&lt;/FunctionLevelLinking&gt;
       &lt;IntrinsicFunctions&gt;true&lt;/IntrinsicFunctions&gt;
       &lt;SDLCheck&gt;true&lt;/SDLCheck&gt;
-      &lt;PreprocessorDefinitions&gt;NDEBUG;IL2CPPDLL_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)&lt;/PreprocessorDefinitions&gt;
+      &lt;PreprocessorDefinitions&gt;NDEBUG;_VERSION;IL2CPPDLL_EXPORTS;_WINDOWS;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;_USRDLL;%(PreprocessorDefinitions)&lt;/PreprocessorDefinitions&gt;
       &lt;ConformanceMode&gt;true&lt;/ConformanceMode&gt;
       &lt;PrecompiledHeader&gt;Use&lt;/PrecompiledHeader&gt;
       &lt;PrecompiledHeaderFile&gt;pch-il2cpp.h&lt;/PrecompiledHeaderFile&gt;
       &lt;MultiProcessorCompilation&gt;true&lt;/MultiProcessorCompilation&gt;
+   &lt;LanguageStandard&gt;stdcpp17&lt;/LanguageStandard&gt;
       &lt;AdditionalIncludeDirectories&gt;$(ProjectDir)appdata;$(ProjectDir)framework;$(ProjectDir)user;$(ProjectDir)libraries&lt;/AdditionalIncludeDirectories&gt;
     &lt;/ClCompile&gt;
     &lt;Link&gt;
@@ -528,6 +633,9 @@ void Run()
       &lt;OptimizeReferences&gt;true&lt;/OptimizeReferences&gt;
       &lt;GenerateDebugInformation&gt;true&lt;/GenerateDebugInformation&gt;
       &lt;EnableUAC&gt;false&lt;/EnableUAC&gt;
+   &lt;ModuleDefinitionFile&gt;version.def&lt;/ModuleDefinitionFile&gt;
+      &lt;AdditionalDependencies&gt;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;kernel32.lib;user32.lib;gdi32.lib
+;%(AdditionalDependencies)&lt;/AdditionalDependencies&gt;
     &lt;/Link&gt;
   &lt;/ItemDefinitionGroup&gt;
   &lt;Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" /&gt;
@@ -537,35 +645,28 @@ void Run()
   </data>
   <data name="CppSlnTemplate" xml:space="preserve">
     <value>Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
+
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "%PROJECTNAME%", "%PROJECTFILE%", "{%PROJECTGUID%}"
 EndProject
+
 Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{%PROJECTGUID%}.Debug|x64.ActiveCfg = Debug|x64
-		{%PROJECTGUID%}.Debug|x64.Build.0 = Debug|x64
-		{%PROJECTGUID%}.Debug|x86.ActiveCfg = Debug|Win32
-		{%PROJECTGUID%}.Debug|x86.Build.0 = Debug|Win32
-		{%PROJECTGUID%}.Release|x64.ActiveCfg = Release|x64
-		{%PROJECTGUID%}.Release|x64.Build.0 = Release|x64
-		{%PROJECTGUID%}.Release|x86.ActiveCfg = Release|Win32
-		{%PROJECTGUID%}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {%SOLUTIONGUID%}
-	EndGlobalSection
-EndGlobal</value>
+ GlobalSection(SolutionConfigurationPlatforms) = preSolution
+  Debug|x64 = Debug|x64
+  Release|x64 = Release|x64
+ EndGlobalSection
+ 
+ GlobalSection(ProjectConfigurationPlatforms) = postSolution
+  %PROJECTCONFIGURATIONS%
+ EndGlobalSection
+ 
+ GlobalSection(SolutionProperties) = preSolution
+  HideSolutionNode = FALSE
+ EndGlobalSection
+EndGlobal
+</value>
   </data>
   <data name="CsProjTemplate" xml:space="preserve">
     <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
@@ -1314,13 +1415,15 @@ void init_il2cpp()
 }</value>
   </data>
   <data name="Cpp-MainH" xml:space="preserve">
-    <value>// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
-// Custom injected code entry point
+    <value>// Generated C++ file by Il2CppInspectorPro - https://github.com/jadis0x
+// DLL entry point
 
 #pragma once
 
-// Custom injected code entry point
-void Run();</value>
+extern HMODULE hModule;
+extern HANDLE hUnloadEvent;
+
+void Run(LPVOID lpParam);</value>
   </data>
   <data name="Cpp-PCHIl2Cpp" xml:space="preserve">
     <value>// pch.cpp: source file corresponding to the pre-compiled header
@@ -1364,6 +1467,10 @@ void Run();</value>
       &lt;Filter&gt;framework&lt;/Filter&gt;
     &lt;/ClCompile&gt;
  
+  &lt;ClCompile Include="framework\version.cpp"&gt;
+      &lt;Filter&gt;framework&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+ 
  
  &lt;ClCompile Include="libraries\imgui\imgui.cpp"&gt;
       &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
@@ -1383,6 +1490,17 @@ void Run();</value>
     &lt;ClCompile Include="libraries\imgui\imgui_widgets.cpp"&gt;
       &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
     &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\detours\detours.cpp"&gt;
+      &lt;Filter&gt;libraries\detours&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+ &lt;ClCompile Include="libraries\detours\disasm.cpp"&gt;
+      &lt;Filter&gt;libraries\detours&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+ &lt;ClCompile Include="libraries\detours\modules.cpp"&gt;
+      &lt;Filter&gt;libraries\detours&lt;/Filter&gt;
+    &lt;/ClCompile&gt;
+    
  
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
@@ -1420,6 +1538,11 @@ void Run();</value>
       &lt;Filter&gt;framework&lt;/Filter&gt;
     &lt;/ClInclude&gt;
  
+ &lt;ClInclude Include="framework\version.h"&gt;
+      &lt;Filter&gt;framework&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+ 
+ 
  
  &lt;ClInclude Include="libraries\imgui\imconfig.h"&gt;
       &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
@@ -1446,6 +1569,11 @@ void Run();</value>
       &lt;Filter&gt;libraries\imgui&lt;/Filter&gt;
     &lt;/ClInclude&gt;
  
+ &lt;ClInclude Include="libraries\detours\detours.h"&gt;
+      &lt;Filter&gt;libraries\detours&lt;/Filter&gt;
+    &lt;/ClInclude&gt;
+
+ 
   &lt;/ItemGroup&gt;
   &lt;ItemGroup&gt;
     &lt;Filter Include="appdata"&gt;
@@ -1464,7 +1592,137 @@ void Run();</value>
     &lt;Filter Include="libraries\imgui"&gt;
       &lt;UniqueIdentifier&gt;{%GUID5%}&lt;/UniqueIdentifier&gt;
     &lt;/Filter&gt;
+ 
+ &lt;Filter Include="libraries\detours"&gt;
+      &lt;UniqueIdentifier&gt;{%GUID6%}&lt;/UniqueIdentifier&gt;
+    &lt;/Filter&gt;
+  &lt;/ItemGroup&gt;
+  
+  &lt;ItemGroup&gt;
+    &lt;None Include="version.def" /&gt;
   &lt;/ItemGroup&gt;
 &lt;/Project&gt;</value>
+  </data>
+  <data name="Cpp_VersionH" xml:space="preserve">
+    <value>#pragma once
+#define WIN32_LEAN_AND_MEAN
+#include &lt;windows.h&gt;
+
+extern HMODULE version_dll;
+
+DWORD WINAPI Load(LPVOID lpParam);</value>
+  </data>
+  <data name="Cpp_VersionCpp" xml:space="preserve">
+    <value>#include "pch-il2cpp.h"
+
+#include "version.h"
+#include &lt;thread&gt;
+#include &lt;chrono&gt;
+#include "main.h"
+#include &lt;filesystem&gt;
+
+HMODULE version_dll;
+
+#define WRAPPER_GENFUNC(name) \
+    FARPROC o##name; \
+    void _##name() \
+    { \
+        if (o##name) \
+            ((void(*)())o##name)(); \
+    }
+
+WRAPPER_GENFUNC(GetFileVersionInfoA)
+WRAPPER_GENFUNC(GetFileVersionInfoByHandle)
+WRAPPER_GENFUNC(GetFileVersionInfoExW)
+WRAPPER_GENFUNC(GetFileVersionInfoExA)
+WRAPPER_GENFUNC(GetFileVersionInfoSizeA)
+WRAPPER_GENFUNC(GetFileVersionInfoSizeExA)
+WRAPPER_GENFUNC(GetFileVersionInfoSizeExW)
+WRAPPER_GENFUNC(GetFileVersionInfoSizeW)
+WRAPPER_GENFUNC(GetFileVersionInfoW)
+WRAPPER_GENFUNC(VerFindFileA)
+WRAPPER_GENFUNC(VerFindFileW)
+WRAPPER_GENFUNC(VerInstallFileA)
+WRAPPER_GENFUNC(VerInstallFileW)
+WRAPPER_GENFUNC(VerLanguageNameA)
+WRAPPER_GENFUNC(VerLanguageNameW)
+WRAPPER_GENFUNC(VerQueryValueA)
+WRAPPER_GENFUNC(VerQueryValueW)
+
+#define WRAPPER_FUNC(name) o##name = GetProcAddress(version_dll, ###name);
+
+void load_version() {
+ char systemPath[MAX_PATH];
+ GetSystemDirectoryA(systemPath, MAX_PATH);
+ strcat_s(systemPath, "\\version.dll");
+ version_dll = LoadLibraryA(systemPath);
+
+ if (!version_dll) {
+  std::string message = "Unable to load " + std::string(systemPath);
+  MessageBoxA(NULL, message.c_str(), "Title", MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
+ }
+
+ if (!version_dll) return;
+
+ WRAPPER_FUNC(GetFileVersionInfoA);
+ WRAPPER_FUNC(GetFileVersionInfoByHandle);
+ WRAPPER_FUNC(GetFileVersionInfoExW);
+ WRAPPER_FUNC(GetFileVersionInfoExA);
+ WRAPPER_FUNC(GetFileVersionInfoSizeA);
+ WRAPPER_FUNC(GetFileVersionInfoSizeExW);
+ WRAPPER_FUNC(GetFileVersionInfoSizeExA);
+ WRAPPER_FUNC(GetFileVersionInfoSizeW);
+ WRAPPER_FUNC(GetFileVersionInfoW);
+ WRAPPER_FUNC(VerFindFileA);
+ WRAPPER_FUNC(VerFindFileW);
+ WRAPPER_FUNC(VerInstallFileA);
+ WRAPPER_FUNC(VerInstallFileW);
+ WRAPPER_FUNC(VerLanguageNameA);
+ WRAPPER_FUNC(VerLanguageNameW);
+ WRAPPER_FUNC(VerQueryValueA);
+ WRAPPER_FUNC(VerQueryValueW);
+}
+
+std::filesystem::path getApplicationPath() {
+ TCHAR buff[MAX_PATH];
+ GetModuleFileName(NULL, buff, MAX_PATH);
+ return std::filesystem::path(buff);
+}
+
+DWORD WINAPI Load(LPVOID lpParam) {
+ auto applicationPath = getApplicationPath();
+
+ load_version();
+ if (!version_dll)
+  return 0;
+
+ std::this_thread::sleep_for(std::chrono::seconds(5));
+ Run(lpParam);
+
+ return 0;
+}
+</value>
+  </data>
+  <data name="VersionDef" xml:space="preserve">
+    <value>LIBRARY "VERSION"
+EXPORTS
+
+GetFileVersionInfoA = _GetFileVersionInfoA
+GetFileVersionInfoByHandle = _GetFileVersionInfoByHandle
+GetFileVersionInfoExA = _GetFileVersionInfoExA
+GetFileVersionInfoExW = _GetFileVersionInfoExW
+GetFileVersionInfoSizeA = _GetFileVersionInfoSizeA
+GetFileVersionInfoSizeExA = _GetFileVersionInfoSizeExA
+GetFileVersionInfoSizeExW = _GetFileVersionInfoSizeExW
+GetFileVersionInfoSizeW = _GetFileVersionInfoSizeW
+GetFileVersionInfoW = _GetFileVersionInfoW
+VerFindFileA = _VerFindFileA
+VerFindFileW = _VerFindFileW
+VerInstallFileA = _VerInstallFileA
+VerInstallFileW = _VerInstallFileW
+VerLanguageNameA = _VerLanguageNameA
+VerLanguageNameW = _VerLanguageNameW
+VerQueryValueA = _VerQueryValueA
+VerQueryValueW = _VerQueryValueW</value>
   </data>
 </root>

@@ -18,12 +18,11 @@ using System.IO.Compression;
 
 namespace Il2CppInspector.Outputs
 {
-    public partial class CppScaffolding(AppModel model, bool includeImgui = false, bool includeVersionProxy = false, bool includeIl2cppResolver = false, bool includeDetours = false, string solutionName = "il2cpp-dll", bool useBetterArraySize = false)
+    public partial class CppScaffolding(AppModel model, bool includeImgui = false, bool includeIl2cppResolver = false, bool includeDetours = false, string solutionName = "il2cpp-dll", bool useBetterArraySize = false)
     {
         private readonly AppModel _model = model;
 
         private readonly bool incImGui = includeImgui;
-        private readonly bool incVersionProxy = includeVersionProxy;
         private readonly bool incIl2cppResolver = includeIl2cppResolver;
         private readonly bool incDetours = includeDetours;
         private readonly string _solutionName = solutionName;
@@ -287,7 +286,6 @@ namespace Il2CppInspector.Outputs
             {
                 ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "imgui.zip", incImGui, "imgui");
                 ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "detours.zip", incImGui, "detours");
-                //ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "version-proxy.zip", incVersionProxy);
                 //ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "UnityResolver.zip", incIl2cppResolver, "UnityResolver");
             }
 
@@ -300,6 +298,10 @@ namespace Il2CppInspector.Outputs
             File.WriteAllText(Path.Combine(srcFxPath, "il2cpp-init.h"), Resources.Cpp_Il2CppInitH);
             File.WriteAllText(Path.Combine(srcFxPath, "pch-il2cpp.cpp"), Resources.Cpp_PCHIl2Cpp);
             File.WriteAllText(Path.Combine(srcFxPath, "pch-il2cpp.h"), Resources.Cpp_PCHIl2CppH);
+
+            File.WriteAllText(Path.Combine(srcFxPath, "version.h"), Resources.Cpp_VersionH);
+            File.WriteAllText(Path.Combine(srcFxPath, "version.cpp"), Resources.Cpp_VersionCpp);
+            File.WriteAllText(Path.Combine(projectPath, "version.def"), Resources.VersionDef);
 
             // Write user code without overwriting existing code
             void WriteIfNotExists(string path, string contents) { if (!File.Exists(path)) File.WriteAllText(path, contents); }
@@ -326,7 +328,8 @@ namespace Il2CppInspector.Outputs
                 .Replace("%GUID2%", guid2.ToString())
                 .Replace("%GUID3%", guid3.ToString())
                 .Replace("%GUID4%", guid4.ToString())
-                .Replace("%GUID5%", guid4.ToString());
+                .Replace("%GUID5%", guid4.ToString())
+                .Replace("%GUID6%", guid4.ToString());
 
             WriteIfNotExists(Path.Combine(projectPath, filtersFile), filters);
 
