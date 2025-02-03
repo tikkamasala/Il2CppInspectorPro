@@ -119,71 +119,32 @@
   </resheader>
   <data name="Cpp-DLLMainCpp" xml:space="preserve">
     <value>// Generated C++ file by Il2CppInspectorPro - https://github.com/jadis0x
-// Custom injected code entry point
-
-#include "pch-il2cpp.h"
+// DLL entry point
 
 #define WIN32_LEAN_AND_MEAN
-#include &lt;Windows.h&gt;
-#include &lt;iostream&gt;
-#include "il2cpp-appdata.h"
-#include "helpers.h"
+#include &lt;windows.h&gt;
+#include "il2cpp-init.h"
 #include "main.h"
-#include &lt;il2cpp-init.h&gt;
 
-using namespace app;
+#include "version.h"
 
-// Set the name of your log file here
-extern const LPCWSTR LOG_FILE = L"Logs.txt";
-
-HMODULE hModule;
-HANDLE hUnloadEvent;
-
-// Custom injected code entry point
-void Run(LPVOID lpParam)
+BOOL APIENTRY DllMain(HMODULE hModule,
+ DWORD  ul_reason_for_call,
+ LPVOID lpReserved
+)
 {
- hModule = (HMODULE)lpParam;
-
- // If you would like to write to a log file, specify the name above and use il2cppi_log_write()
- // il2cppi_log_write("Startup");
-
- // If you would like to output to a new console window, use il2cppi_new_console() to open one and redirect stdout
- il2cppi_new_console();
- SetConsoleTitleA("Example App");
-
- init_il2cpp();
- hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
- if (hUnloadEvent == NULL) {
-  std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
-  return;
+ switch (ul_reason_for_call)
+ {
+ case DLL_PROCESS_ATTACH:
+  DisableThreadLibraryCalls(hModule);
+  CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Load, hModule, NULL, NULL);
+  break;
+ case DLL_PROCESS_DETACH:
+  FreeLibrary(version_dll);
+  break;
  }
-
- std::cout &lt;&lt; "[INFO] Initializing.. " &lt;&lt; std::endl;
-
- // Initialize thread data - DO NOT REMOVE
- Il2CppDomain* _domain = il2cpp_domain_get();
- Il2CppThread* _thread = nullptr;
-
- // Check if IL2CPP domain is found
- if (_domain) {
-  std::cout &lt;&lt; "[INFO] IL2CPP Domain Found: " &lt;&lt; _domain &lt;&lt; std::endl;
-
-  // Attach thread to IL2CPP domain
-  _thread = il2cpp_thread_attach(_domain);
-
-  if (_thread) {
-   std::cout &lt;&lt; "[INFO] IL2CPP Thread Attached Successfully: " &lt;&lt; _thread &lt;&lt; std::endl;
-  }
-  else {
-   std::cout &lt;&lt; "[ERROR] Failed to Attach IL2CPP Thread!" &lt;&lt; std::endl;
-  }
- }
- else {
-  std::cout &lt;&lt; "[ERROR] IL2CPP Domain Not Found!" &lt;&lt; std::endl;
- }
-}
-
-</value>
+ return TRUE;
+}</value>
   </data>
   <data name="Cpp-HelpersCpp" xml:space="preserve">
     <value>// Generated C++ file by Il2CppInspector - http://www.djkaty.com - https://github.com/djkaty
@@ -306,6 +267,7 @@ void init_il2cpp();</value>
 #include "main.h"
 #include &lt;il2cpp-init.h&gt;
 
+
 using namespace app;
 
 // Set the name of your log file here
@@ -317,26 +279,45 @@ HANDLE hUnloadEvent;
 // Custom injected code entry point
 void Run(LPVOID lpParam)
 {
-    hModule = (HMODULE)lpParam;
-   
-    // If you would like to write to a log file, specify the name above and use il2cppi_log_write()
-    // il2cppi_log_write("Startup");
+ hModule = (HMODULE)lpParam;
 
-    // If you would like to output to a new console window, use il2cppi_new_console() to open one and redirect stdout
-    il2cppi_new_console();
-    SetConsoleTitleA("Example App");
+ // If you would like to write to a log file, specify the name above and use il2cppi_log_write()
+ // il2cppi_log_write("Startup");
 
-    init_il2cpp();
-    hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (hUnloadEvent == NULL) {
-        std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
-        return;
-    }
+ // If you would like to output to a new console window, use il2cppi_new_console() to open one and redirect stdout
+ il2cppi_new_console();
+ SetConsoleTitleA("Example App");
 
-    // Initialize thread data - DO NOT REMOVE
-    il2cpp_thread_attach(il2cpp_domain_get());
+ init_il2cpp();
+ hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+ if (hUnloadEvent == NULL) {
+  std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
+  return;
+ }
 
-    // Place your custom code here
+ std::cout &lt;&lt; "[INFO] Initializing.. " &lt;&lt; std::endl;
+
+ // Initialize thread data - DO NOT REMOVE
+ Il2CppDomain* _domain = il2cpp_domain_get();
+ Il2CppThread* _thread = nullptr;
+
+ // Check if IL2CPP domain is found
+ if (_domain) {
+  std::cout &lt;&lt; "[INFO] IL2CPP Domain Found: " &lt;&lt; _domain &lt;&lt; std::endl;
+
+  // Attach thread to IL2CPP domain
+  _thread = il2cpp_thread_attach(_domain);
+
+  if (_thread) {
+   std::cout &lt;&lt; "[INFO] IL2CPP Thread Attached Successfully: " &lt;&lt; _thread &lt;&lt; std::endl;
+  }
+  else {
+   std::cout &lt;&lt; "[ERROR] Failed to Attach IL2CPP Thread!" &lt;&lt; std::endl;
+  }
+ }
+ else {
+  std::cout &lt;&lt; "[ERROR] IL2CPP Domain Not Found!" &lt;&lt; std::endl;
+ }
 }
 
 </value>

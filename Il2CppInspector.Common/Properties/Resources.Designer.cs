@@ -62,28 +62,27 @@ namespace Il2CppInspector.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to // Generated C++ file by Il2CppInspectorPro - https://github.com/jadis0x
-        ///// Custom injected code entry point
-        ///
-        ///#include &quot;pch-il2cpp.h&quot;
+        ///// DLL entry point
         ///
         ///#define WIN32_LEAN_AND_MEAN
-        ///#include &lt;Windows.h&gt;
-        ///#include &lt;iostream&gt;
-        ///#include &quot;il2cpp-appdata.h&quot;
-        ///#include &quot;helpers.h&quot;
+        ///#include &lt;windows.h&gt;
+        ///#include &quot;il2cpp-init.h&quot;
         ///#include &quot;main.h&quot;
-        ///#include &lt;il2cpp-init.h&gt;
         ///
-        ///using namespace app;
+        ///#include &quot;version.h&quot;
         ///
-        ///// Set the name of your log file here
-        ///extern const LPCWSTR LOG_FILE = L&quot;Logs.txt&quot;;
-        ///
-        ///HMODULE hModule;
-        ///HANDLE hUnloadEvent;
-        ///
-        ///// Custom injected code entry point
-        ///void Run(LPV [rest of string was truncated]&quot;;.
+        ///BOOL APIENTRY DllMain(HMODULE hModule,
+        /// DWORD  ul_reason_for_call,
+        /// LPVOID lpReserved
+        ///)
+        ///{
+        /// switch (ul_reason_for_call)
+        /// {
+        /// case DLL_PROCESS_ATTACH:
+        ///  DisableThreadLibraryCalls(hModule);
+        ///  CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Load, hModule, NULL, NULL);
+        ///  break;
+        /// case DLL_PR [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Cpp_DLLMainCpp {
             get {
@@ -231,6 +230,7 @@ namespace Il2CppInspector.Properties {
         ///#include &quot;main.h&quot;
         ///#include &lt;il2cpp-init.h&gt;
         ///
+        ///
         ///using namespace app;
         ///
         ///// Set the name of your log file here
@@ -240,7 +240,7 @@ namespace Il2CppInspector.Properties {
         ///HANDLE hUnloadEvent;
         ///
         ///// Custom injected code entry point
-        ///void Run(LPV [rest of string was truncated]&quot;;.
+        ///void Run(L [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Cpp_MainCpp {
             get {
