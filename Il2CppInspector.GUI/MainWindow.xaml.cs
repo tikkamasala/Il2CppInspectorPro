@@ -563,21 +563,14 @@ namespace Il2CppInspectorGUI
                         OnStatusUpdate(this, $"Building application model for Unity {selectedCppUnityVersion}/{cppCompiler}");
                         model.Build(selectedCppUnityVersion, cppCompiler);
 
-                        bool includeImgui = false;
-                        bool includeIl2cppResolver = false;
-                        bool includeDetours = false;
-
                         string solutionName = "";
 
                         Dispatcher.Invoke(() => {
-                            includeImgui = chk_Imgui.IsChecked.Value;
-                            includeIl2cppResolver = chk_il2cppResolver.IsChecked.Value;
-                            includeDetours = chk_detours.IsChecked.Value;
                             solutionName = txtSolutionName.Text.Length > 3 ? txtSolutionName.Text.Trim() : "il2cpp-dll";
                         });
 
                         OnStatusUpdate(this, "Generating C++ scaffolding");
-                        new CppScaffolding(model, includeImgui, includeIl2cppResolver, includeDetours, solutionName).Write(cppOutPath);
+                        new CppScaffolding(model, solutionName).Write(cppOutPath);
                     });
                     break;
 

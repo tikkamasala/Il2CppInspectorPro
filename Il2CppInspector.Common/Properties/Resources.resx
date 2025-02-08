@@ -267,6 +267,8 @@ void init_il2cpp();</value>
 #include "main.h"
 #include &lt;il2cpp-init.h&gt;
 
+#include &lt;pipeline/hooks/InitHooks.h&gt;
+
 
 using namespace app;
 
@@ -275,6 +277,22 @@ extern const LPCWSTR LOG_FILE = L"Logs.txt";
 
 HMODULE hModule;
 HANDLE hUnloadEvent;
+
+DWORD WINAPI UnloadWatcherThread(LPVOID lpParam)
+{
+ HANDLE hEvent = static_cast&lt;HANDLE&gt;(lpParam);
+
+ if (WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0)
+ {
+  std::cout &lt;&lt; "[WARNING] Unload signal received.." &lt;&lt; std::endl;
+  DetourUninitialization();
+  fclose(stdout);
+  FreeConsole();
+  CloseHandle(hUnloadEvent);
+  FreeLibraryAndExitThread(hModule, 0);
+ }
+ return 0;
+}
 
 // Custom injected code entry point
 void Run(LPVOID lpParam)
@@ -289,12 +307,7 @@ void Run(LPVOID lpParam)
  SetConsoleTitleA("Example App");
 
  init_il2cpp();
- hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
- if (hUnloadEvent == NULL) {
-  std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
-  return;
- }
-
+ 
  std::cout &lt;&lt; "[INFO] Initializing.. " &lt;&lt; std::endl;
 
  // Initialize thread data - DO NOT REMOVE
@@ -317,6 +330,26 @@ void Run(LPVOID lpParam)
  }
  else {
   std::cout &lt;&lt; "[ERROR] IL2CPP Domain Not Found!" &lt;&lt; std::endl;
+ }
+
+ DetourInitilization();
+
+ hUnloadEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+ if (hUnloadEvent == NULL) {
+  std::cout &lt;&lt; "Failed to create unload event! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
+  return;
+ }
+
+
+ DWORD dwThreadId;
+ HANDLE hWatcherThread = CreateThread(NULL, 0, UnloadWatcherThread, hUnloadEvent, 0, &amp;dwThreadId);
+ if (hWatcherThread != NULL)
+ {
+  CloseHandle(hWatcherThread);
+ }
+ else
+ {
+  std::cout &lt;&lt; "[ERROR] Unable to create unload monitor thread! Error code: " &lt;&lt; GetLastError() &lt;&lt; std::endl;
  }
 }
 
@@ -402,6 +435,61 @@ void Run(LPVOID lpParam)
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
   &lt;/ClCompile&gt;
   
+  &lt;ClCompile Include="libraries\pipeline\Dx11.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\keybinds.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\settings.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\gui\GUITheme.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\gui\menu.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\gui\tabs\SettingsTAB.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\hooks\DirectX.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
+  
+  &lt;ClCompile Include="libraries\pipeline\hooks\InitHooks.cpp"&gt;
+     &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+      &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
+  &lt;/ClCompile&gt;
   
     &lt;ClCompile Include="framework\dllmain.cpp"&gt;
       &lt;PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"&gt;NotUsing&lt;/PrecompiledHeader&gt;
@@ -455,6 +543,19 @@ void Run(LPVOID lpParam)
   &lt;ClInclude Include="libraries\imgui\imgui_impl_win32.h" /&gt;
   
   &lt;ClInclude Include="libraries\detours\detours.h" /&gt;
+  
+  &lt;ClInclude Include="libraries\pipeline\Dx11.h" /&gt;
+  &lt;ClInclude Include="libraries\pipeline\keybinds.h" /&gt;
+  &lt;ClInclude Include="libraries\pipeline\settings.h" /&gt;
+  
+  &lt;ClInclude Include="libraries\pipeline\gui\GUITheme.h" /&gt;
+  &lt;ClInclude Include="libraries\pipeline\gui\menu.h" /&gt;
+  
+  &lt;ClInclude Include="libraries\pipeline\gui\tabs\SettingsTAB.h" /&gt;
+
+  &lt;ClInclude Include="libraries\pipeline\hooks\DirectX.h" /&gt;
+  &lt;ClInclude Include="libraries\pipeline\hooks\InitHooks.h" /&gt;
+  
   
   &lt;/ItemGroup&gt;
   
@@ -1480,7 +1581,39 @@ void Run(LPVOID lpParam);</value>
     &lt;/ClCompile&gt;
  &lt;ClCompile Include="libraries\detours\modules.cpp"&gt;
       &lt;Filter&gt;libraries\detours&lt;/Filter&gt;
-    &lt;/ClCompile&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\Dx11.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\keybinds.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\settings.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\hooks\InitHooks.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline\hooks&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+  &lt;ClCompile Include="libraries\pipeline\hooks\DirectX.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline\hooks&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\gui\GUITheme.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\gui\menu.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
+ 
+ &lt;ClCompile Include="libraries\pipeline\gui\tabs\SettingsTAB.cpp"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui\tabs&lt;/Filter&gt;
+ &lt;/ClCompile&gt;
     
  
   &lt;/ItemGroup&gt;
@@ -1555,7 +1688,40 @@ void Run(LPVOID lpParam);</value>
     &lt;/ClInclude&gt;
 
  
+ &lt;ClInclude Include="libraries\pipeline\Dx11.h"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+ &lt;ClInclude Include="libraries\pipeline\keybinds.h"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+ &lt;ClInclude Include="libraries\pipeline\settings.h"&gt;
+      &lt;Filter&gt;libraries\pipeline&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+  &lt;ClInclude Include="libraries\pipeline\hooks\InitHooks.h"&gt;
+      &lt;Filter&gt;libraries\pipeline\hooks&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+  &lt;ClInclude Include="libraries\pipeline\hooks\DirectX.h"&gt;
+      &lt;Filter&gt;libraries\pipeline\hooks&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+ &lt;ClInclude Include="libraries\pipeline\gui\GUITheme.h"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+ &lt;ClInclude Include="libraries\pipeline\gui\menu.h"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
+ &lt;ClInclude Include="libraries\pipeline\gui\tabs\SettingsTAB.h"&gt;
+      &lt;Filter&gt;libraries\pipeline\gui\tabs&lt;/Filter&gt;
+ &lt;/ClInclude&gt;
+ 
   &lt;/ItemGroup&gt;
+  
   &lt;ItemGroup&gt;
     &lt;Filter Include="appdata"&gt;
       &lt;UniqueIdentifier&gt;{%GUID1%}&lt;/UniqueIdentifier&gt;
@@ -1570,13 +1736,28 @@ void Run(LPVOID lpParam);</value>
  &lt;Filter Include="libraries"&gt;
       &lt;UniqueIdentifier&gt;{%GUID4%}&lt;/UniqueIdentifier&gt;
     &lt;/Filter&gt;
-    &lt;Filter Include="libraries\imgui"&gt;
+  
+  &lt;Filter Include="libraries\imgui"&gt;
       &lt;UniqueIdentifier&gt;{%GUID5%}&lt;/UniqueIdentifier&gt;
     &lt;/Filter&gt;
  
  &lt;Filter Include="libraries\detours"&gt;
       &lt;UniqueIdentifier&gt;{%GUID6%}&lt;/UniqueIdentifier&gt;
     &lt;/Filter&gt;
+ 
+ &lt;Filter Include="libraries\pipeline"&gt;
+    &lt;UniqueIdentifier&gt;{%GUID7%}&lt;/UniqueIdentifier&gt;
+  &lt;/Filter&gt;
+  &lt;Filter Include="libraries\pipeline\gui"&gt;
+    &lt;UniqueIdentifier&gt;{%GUID8%}&lt;/UniqueIdentifier&gt;
+  &lt;/Filter&gt;
+  &lt;Filter Include="libraries\pipeline\gui\tabs"&gt;
+    &lt;UniqueIdentifier&gt;{%GUID9%}&lt;/UniqueIdentifier&gt;
+  &lt;/Filter&gt;
+  &lt;Filter Include="libraries\pipeline\hooks"&gt;
+    &lt;UniqueIdentifier&gt;{%GUID10%}&lt;/UniqueIdentifier&gt;
+  &lt;/Filter&gt;
+ 
   &lt;/ItemGroup&gt;
   
   &lt;ItemGroup&gt;

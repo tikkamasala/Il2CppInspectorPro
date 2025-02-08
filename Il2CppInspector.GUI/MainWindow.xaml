@@ -405,12 +405,14 @@
 
                                 <!-- Library -->
                                 <DockPanel LastChildFill="True" Margin="0,8,0,0">
-                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Top">Libraries to be included:</Label>
+                                    <Label DockPanel.Dock="Left" Width="250" VerticalAlignment="Top">
+                                        Libraries to be included:
+                                    </Label>
                                     <StackPanel Orientation="Vertical" Margin="4,0,0,0">
-                                        <CheckBox Name="chk_Imgui" Content="Dear ImGui" Margin="2"/>
-                                        <CheckBox Name="chk_detours" Content="Detours" Margin="2"/>
-                                        <CheckBox Name="chk_VersionProxy" IsChecked="True" IsEnabled="False" Content="Version Proxy" Margin="2"/>
-                                        <CheckBox Name="chk_il2cppResolver" Content="Jadis0x's IL2CPP Resolver" Margin="2"/>
+                                        <TextBlock Text="• Dear ImGui" Margin="2"/>
+                                        <TextBlock Text="• Detours" Margin="2"/>
+                                        <TextBlock Text="• Version.dll" Margin="2"/>
+                                        <TextBlock Text="• Jadis0x's IL2CPP Resolver" Margin="2"/>
                                     </StackPanel>
                                 </DockPanel>
                             </StackPanel>

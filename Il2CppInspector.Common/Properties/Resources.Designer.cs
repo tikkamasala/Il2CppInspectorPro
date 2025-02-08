@@ -230,6 +230,8 @@ namespace Il2CppInspector.Properties {
         ///#include &quot;main.h&quot;
         ///#include &lt;il2cpp-init.h&gt;
         ///
+        ///#include &lt;pipeline/hooks/InitHooks.h&gt;
+        ///
         ///
         ///using namespace app;
         ///
@@ -239,8 +241,7 @@ namespace Il2CppInspector.Properties {
         ///HMODULE hModule;
         ///HANDLE hUnloadEvent;
         ///
-        ///// Custom injected code entry point
-        ///void Run(L [rest of string was truncated]&quot;;.
+        ///DWORD  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Cpp_MainCpp {
             get {

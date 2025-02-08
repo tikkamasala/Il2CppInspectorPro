@@ -18,13 +18,10 @@ using System.IO.Compression;
 
 namespace Il2CppInspector.Outputs
 {
-    public partial class CppScaffolding(AppModel model, bool includeImgui = false, bool includeIl2cppResolver = false, bool includeDetours = false, string solutionName = "il2cpp-dll", bool useBetterArraySize = false)
+    public partial class CppScaffolding(AppModel model, string solutionName = "il2cpp-dll", bool useBetterArraySize = false)
     {
         private readonly AppModel _model = model;
 
-        private readonly bool incImGui = includeImgui;
-        private readonly bool incIl2cppResolver = includeIl2cppResolver;
-        private readonly bool incDetours = includeDetours;
         private readonly string _solutionName = solutionName;
 
         /*
@@ -39,10 +36,8 @@ namespace Il2CppInspector.Outputs
 
         private StreamWriter _writer;
 
-        private void ExtractIfEnabled(string sourcePath, string targetPath, string zipFileName, bool isEnabled, string targetFolderName = null)
+        private void ExtractZip(string sourcePath, string targetPath, string zipFileName, string targetFolderName = null)
         {
-            if (!isEnabled) return;
-
             string zipFilePath = Path.Combine(sourcePath, zipFileName);
 
             string folderName = targetFolderName ?? Path.GetFileNameWithoutExtension(zipFileName);
@@ -284,9 +279,9 @@ namespace Il2CppInspector.Outputs
 
             if (Directory.Exists(inspectorLibrariesPath))
             {
-                ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "imgui.zip", incImGui, "imgui");
-                ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "detours.zip", incImGui, "detours");
-                //ExtractIfEnabled(inspectorLibrariesPath, srcLibraryPath, "UnityResolver.zip", incIl2cppResolver, "UnityResolver");
+                ExtractZip(inspectorLibrariesPath, srcLibraryPath, "imgui.zip", "imgui");
+                ExtractZip(inspectorLibrariesPath, srcLibraryPath, "detours.zip", "detours");
+                ExtractZip(inspectorLibrariesPath, srcLibraryPath, "pipeline.zip", "pipeline");
             }
 
             // Write boilerplate code
@@ -321,6 +316,12 @@ namespace Il2CppInspector.Outputs
             var guid2 = Guid.NewGuid();
             var guid3 = Guid.NewGuid();
             var guid4 = Guid.NewGuid();
+            var guid5 = Guid.NewGuid();
+            var guid6 = Guid.NewGuid();
+            var guid7 = Guid.NewGuid();
+            var guid8 = Guid.NewGuid();
+            var guid9 = Guid.NewGuid();
+            var guid10 = Guid.NewGuid();
             var filtersFile = projectFile + ".filters";
 
             var filters = Resources.CppProjFilters
@@ -328,8 +329,12 @@ namespace Il2CppInspector.Outputs
                 .Replace("%GUID2%", guid2.ToString())
                 .Replace("%GUID3%", guid3.ToString())
                 .Replace("%GUID4%", guid4.ToString())
-                .Replace("%GUID5%", guid4.ToString())
-                .Replace("%GUID6%", guid4.ToString());
+                .Replace("%GUID5%", guid5.ToString())
+                .Replace("%GUID6%", guid6.ToString())
+                .Replace("%GUID7%", guid7.ToString())
+                .Replace("%GUID8%", guid8.ToString())
+                .Replace("%GUID9%", guid9.ToString())
+                .Replace("%GUID10%", guid10.ToString());
 
             WriteIfNotExists(Path.Combine(projectPath, filtersFile), filters);
 
