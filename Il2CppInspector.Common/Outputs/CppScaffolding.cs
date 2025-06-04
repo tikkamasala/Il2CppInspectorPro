@@ -43,9 +43,9 @@ namespace Il2CppInspector.Outputs
             string folderName = targetFolderName ?? Path.GetFileNameWithoutExtension(zipFileName);
             string extractPath = Path.Combine(targetPath, folderName);
 
-            if (!File.Exists(zipFilePath)) return;  
+            if (!File.Exists(zipFilePath)) return;
 
-           
+
             Directory.CreateDirectory(extractPath);
             ZipFile.ExtractToDirectory(zipFilePath, extractPath, overwriteFiles: true);
         }
@@ -228,7 +228,7 @@ namespace Il2CppInspector.Outputs
                 writeHeader();
                 writeSectionHeader("IL2CPP application-specific type definition addresses");
 
-                foreach (var type in _model.Types.Values.Where(t => t.TypeClassAddress != 0xffffffff_ffffffff))
+                foreach (var type in _model.Types.Values.Where(t => t.TypeClassAddress != 0xffffffff_ffffffff && !t.Type.IsGenericParameter))
                 {
                     writeCode($"DO_TYPEDEF(0x{type.TypeClassAddress - _model.Package.BinaryImage.ImageBase:X8}, {type.Name});");
                 }
